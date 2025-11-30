@@ -22,21 +22,27 @@ This guide will walk you through configuring Cloudflare DNS records and API toke
 
 ### Option 1: Buy a Cheap Dedicated Domain (Recommended ✅)
 
-**Buy a cheap domain just for your NAS services** (~$10-15/year):
+**Buy a cheap domain just for your NAS services** - as little as **$8/year** for a `.cc` domain!
 
-**Examples**: `yourname-nas.com`, `yourname-media.net`, `yourdomain.com`
+**Recommended: Buy directly from Cloudflare Registrar**
+- Go to https://dash.cloudflare.com/ → Domain Registration → Register Domain
+- Search for available domains
+- **`.cc` domains are ~$8/year** and work great for this purpose
+- Cloudflare sells at cost (no markup) so it's the cheapest option
+
+**Examples**: `yourname-nas.cc`, `mymedia.cc`, `home-server.cc`
 
 **Pros**:
+- ✅ Super cheap (~$8/year for .cc)
 - ✅ Simple setup (no existing DNS to migrate)
-- ✅ Cloudflare DNS challenge works perfectly
+- ✅ Already on Cloudflare (no transfer needed)
+- ✅ DNS challenge works immediately
 - ✅ Wildcard SSL certificates
 - ✅ Don't touch your existing domain/website
-- ✅ Clean separation of concerns
 
-**Where to buy**:
-- **Cloudflare Registrar** (at-cost, easiest) - https://dash.cloudflare.com/
-- **Namecheap** (cheap, reliable)
+**Other registrars** (if Cloudflare doesn't have your TLD):
 - **Porkbun** (often cheapest)
+- **Namecheap** (reliable)
 
 **Best for**: Most users, especially if you have an existing domain with complex DNS
 
