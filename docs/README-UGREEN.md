@@ -116,11 +116,12 @@ Internet
     └─── Port 51820/udp ───────────► WireGuard VPN Server
 ```
 
-### Why Two Separate Docker Compose Files?
+### Why Three Separate Docker Compose Files?
 
-You'll notice this project uses **two separate compose files**:
-1. `docker-compose.traefik.yml` - Infrastructure layer
-2. `docker-compose.arr-stack.yml` - Application layer
+You'll notice this project uses **three separate compose files**:
+1. `docker-compose.traefik.yml` - Infrastructure layer (reverse proxy, SSL)
+2. `docker-compose.arr-stack.yml` - Application layer (media services)
+3. `docker-compose.cloudflared.yml` - Tunnel layer (external access via Cloudflare)
 
 **This is intentional and follows best practices.** Here's why:
 

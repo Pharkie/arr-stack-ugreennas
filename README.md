@@ -117,22 +117,23 @@ Internet → Port 80/443 → Traefik (Reverse Proxy)
                                         (VPN-routed for privacy)
 ```
 
-### Two-File Architecture
+### Three-File Architecture
 
-This project uses **two separate Docker Compose files** (not one):
+This project uses **three separate Docker Compose files** (not one):
 
 - **`docker-compose.traefik.yml`** - Infrastructure layer (reverse proxy, SSL, networking)
 - **`docker-compose.arr-stack.yml`** - Application layer (media services)
+- **`docker-compose.cloudflared.yml`** - Tunnel layer (external access via Cloudflare)
 
 **Why?** This separation provides:
 - Independent lifecycle management (update services without affecting Traefik)
 - Scalability (one Traefik can serve multiple stacks)
-- Clean architecture (infrastructure vs. application concerns)
+- Clean architecture (infrastructure vs. application vs. tunnel concerns)
 - Easier troubleshooting (isolated logs and configs)
 
-**Deployment order matters**: Deploy Traefik first (creates network), then arr-stack (joins network).
+**Deployment order matters**: Deploy Traefik first (creates network), then cloudflared, then arr-stack.
 
-See [Architecture section in README-UGREEN.md](docs/README-UGREEN.md#why-two-separate-docker-compose-files) for detailed explanation.
+See [Architecture section in README-UGREEN.md](docs/README-UGREEN.md#why-three-separate-docker-compose-files) for detailed explanation.
 
 ### Storage Structure
 

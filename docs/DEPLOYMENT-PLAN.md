@@ -11,22 +11,24 @@
 
 ---
 
-## Architecture Note: Two-File Deployment
+## Architecture Note: Three-File Deployment
 
-This stack uses **two separate Docker Compose files**:
+This stack uses **three separate Docker Compose files**:
 
 1. **`docker-compose.traefik.yml`** - Infrastructure layer (reverse proxy, SSL, networking)
-2. **`docker-compose.arr-stack.yml`** - Application layer (all media services)
+2. **`docker-compose.cloudflared.yml`** - Tunnel layer (external access via Cloudflare)
+3. **`docker-compose.arr-stack.yml`** - Application layer (all media services)
 
 **Why separate?**
 - Independent lifecycle management (restart/update services without affecting Traefik)
 - Scalability (one Traefik can serve multiple future stacks)
-- Clean separation of concerns (infrastructure vs. applications)
+- Clean separation of concerns (infrastructure vs. tunnel vs. applications)
 - Easier troubleshooting (isolated logs and configurations)
 
 **⚠️ IMPORTANT: Deployment Order Matters!**
 1. **Deploy Traefik FIRST** → Creates the `traefik-proxy` network and sets up SSL
-2. **Deploy arr-stack SECOND** → Joins the existing network and uses Traefik for routing
+2. **Deploy cloudflared SECOND** → Connects tunnel for external access
+3. **Deploy arr-stack THIRD** → Joins the existing network and uses Traefik for routing
 
 If you deploy in the wrong order, arr-stack will fail with "network not found" error.
 
