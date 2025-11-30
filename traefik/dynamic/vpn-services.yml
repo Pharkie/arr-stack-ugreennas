@@ -1,0 +1,126 @@
+http:
+  routers:
+    homarr:
+      rule: "Host(`homarr.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: homarr
+
+    sonarr:
+      rule: "Host(`sonarr.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: sonarr
+
+    radarr:
+      rule: "Host(`radarr.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: radarr
+
+    qbittorrent:
+      rule: "Host(`qbit.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: qbittorrent
+
+    prowlarr:
+      rule: "Host(`prowlarr.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: prowlarr
+
+    jellyfin:
+      rule: "Host(`jellyfin.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: jellyfin
+
+    jellyseerr:
+      rule: "Host(`jellyseerr.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: jellyseerr
+
+    bazarr:
+      rule: "Host(`bazarr.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: bazarr
+
+    pihole:
+      rule: "Host(`pihole.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: pihole
+
+    wg:
+      rule: "Host(`wg.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: wg
+
+    traefik-dashboard:
+      rule: "Host(`traefik.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: api@internal
+      middlewares:
+        - dashboard-auth
+
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$c8hfpRTf$q9JyOMTRUt2bp4XpBR94a."
+
+  services:
+    homarr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.7:7575"
+
+    sonarr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.3:8989"
+
+    radarr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.3:7878"
+
+    qbittorrent:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.3:8085"
+
+    prowlarr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.3:9696"
+
+    jellyfin:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.4:8096"
+
+    jellyseerr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.8:5055"
+
+    bazarr:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.9:6767"
+
+    pihole:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.5:80"
+
+    wg:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.100.6:51821"

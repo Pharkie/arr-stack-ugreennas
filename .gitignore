@@ -1,0 +1,82 @@
+# Environment & Secrets
+.env
+.claude/
+*.key
+*.pem
+*.crt
+
+# Traefik SSL Certificates
+traefik/acme.json
+traefik/*.json
+
+# Application Configs (these should be on NAS, not in repo)
+gluetun-config/
+jellyseerr/
+bazarr/
+notifiarr/
+homarr/
+
+# Backup Files
+*.tar.gz
+*.zip
+*.backup
+backups/
+
+# Logs
+*.log
+logs/
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Temporary Files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Node (if you add any scripts)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Python (if you add any scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Personal Notes
+notes.md
+TODO.md
+scratch/

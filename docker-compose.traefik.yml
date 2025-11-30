@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      traefik-proxy:
+        ipv4_address: 192.168.100.2
+    ports:
+      - "8080:80"   # HTTP (Ugreen uses port 80, so Traefik uses 8080)
+      - "8443:443"  # HTTPS (Ugreen uses port 443, so Traefik uses 8443)
+      - "9090:8080" # Traefik Dashboard
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+      - TZ=Europe/London
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/dynamic:/dynamic:ro
+      - ./traefik/acme.json:/acme.json
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-proxy"
+
+      # Dashboard
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=web,websecure"
+      - "traefik.http.routers.traefik-dashboard.tls=true"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.middlewares=dashboard-auth"
+
+      # Dashboard authentication (replace with your own htpasswd)
+      # Generate with: echo $(htpasswd -nb admin yourpassword) | sed -e s/\\$/\\$\\$/g
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}"
+
+      # HTTP to HTTPS redirect - Disabled for Cloudflare Tunnel compatibility
+      # - "traefik.http.routers.traefik-dashboard-http.rule=Host(`traefik.${DOMAIN}`)"
+      # - "traefik.http.routers.traefik-dashboard-http.entrypoints=web"
+      # - "traefik.http.routers.traefik-dashboard-http.middlewares=https-redirect"
+      # - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      # - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  traefik-proxy:
+    external: true
