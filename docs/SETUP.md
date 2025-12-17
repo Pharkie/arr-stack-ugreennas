@@ -5,7 +5,7 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [Step 1: Create Directories and Clone Repository](#step-1-create-directories-and-clone-repository)
+- [Step 1: Create Directories and Clone/Fork Repository](#step-1-create-directories-and-clonefork-repository)
 - [Step 2: Configure Environment](#step-2-configure-environment)
 - [Step 3: External Access (Optional)](#step-3-external-access-optional)
 - [Step 4: Deploy Services](#step-4-deploy-services)
@@ -34,7 +34,7 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 ### Required Services
 - **VPN Subscription** - Any provider supported by [Gluetun](https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers) (Surfshark, NordVPN, PIA, Mullvad, ProtonVPN, etc.)
 
-### Optional (for remote access)
+### For remote access (optional)
 - **Domain Name** (~$8-10/year)
 - **Cloudflare Account** (free tier)
 
@@ -42,9 +42,15 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 
 ---
 
-## Step 1: Create Directories and Clone Repository
+## Step 1: Create Directories and Clone/Fork Repository
 
-Create media folders and clone this repository to your Docker host.
+Create media folders and get the repository onto your Docker host.
+
+**Clone or Fork?**
+- **Clone** (simpler): Just want to use the stack, pull updates occasionally
+- **Fork** (recommended): Plan to add your own services (e.g., Audiobookshelf, Nextcloud), want to contribute improvements back, or keep your own version
+
+To fork: Click "Fork" on GitHub, then clone your fork instead of this repo.
 
 <details>
 <summary><strong>Ugreen NAS (UGOS)</strong></summary>
@@ -435,7 +441,7 @@ docker exec gluetun wget -qO- ifconfig.me
 
 ### 5.5 Jellyfin (Media Server)
 
-1. **Access:** `http://HOST_IP:8096` or `https://jellyfin.yourdomain.com`
+1. **Access:** `http://HOST_IP:8096`
 2. **Initial Setup:** Create admin account
 3. **Add Libraries:**
    - Movies: Content type "Movies", Folder `/media/movies`
@@ -443,7 +449,7 @@ docker exec gluetun wget -qO- ifconfig.me
 
 ### 5.6 Jellyseerr (Request Manager)
 
-1. **Access:** `http://HOST_IP:5055` or `https://jellyseerr.yourdomain.com`
+1. **Access:** `http://HOST_IP:5055`
 2. **Sign in with Jellyfin:**
    - Jellyfin URL: `http://jellyfin:8096`
    - Enter Jellyfin credentials

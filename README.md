@@ -96,43 +96,11 @@ Ask Claude to help deploy the stack - it reads [`.claude/instructions.md`](.clau
 | **duc** | Disk usage analyzer (treemap UI) | NAS_IP:8838 | Via WireGuard |
 | **qbit-scheduler** | Pauses torrents overnight (20:00-06:00) for disk spin-down | - | - |
 
-## Deployment Options
+## Compatibility
 
-### Option A: Remote Access (Recommended)
-
-Access your services from anywhere - phone on mobile data, travelling, etc. Requires a cheap domain (~$10/year):
-- **Remote access** from anywhere via Cloudflare Tunnel
-- **SSL/HTTPS** with automatic certificates
-- **Pretty URLs** like `jellyfin.yourdomain.com`
-- **WireGuard VPN** for secure access to your home network
-
-**Requirements:** Domain name, Cloudflare account (free), VPN subscription
-
-> **Cloudflare:** This stack is configured for Cloudflare (DNS + Tunnel). Other DNS providers work but you'll need to modify `docker-compose.traefik.yml` and `traefik/traefik.yml`. See [Traefik ACME docs](https://doc.traefik.io/traefik/https/acme/).
->
 > **VPN:** Configured for Surfshark but Gluetun supports 30+ providers (NordVPN, PIA, Mullvad, etc.). See [Gluetun providers](https://github.com/qdm12/gluetun-wiki/tree/main/setup/providers).
-
-### Option B: Local Network Only (No Domain)
-
-Skip the domain and access services directly via IP:port. All services work out of the box:
-- `http://NAS_IP:8096` → Jellyfin
-- `http://NAS_IP:5055` → Jellyseerr
-- `http://NAS_IP:8989` → Sonarr
-- `http://NAS_IP:7878` → Radarr
-- `http://NAS_IP:9696` → Prowlarr
-- `http://NAS_IP:8085` → qBittorrent
-- `http://NAS_IP:6767` → Bazarr
-- `http://NAS_IP:53` → Pi-hole DNS
-
-**What works:** All media automation, VPN-protected downloads, Pi-hole DNS, local streaming
-
-**What you lose:** Remote access, HTTPS, subdomain routing, WireGuard remote VPN
-
-**To deploy local-only:**
-1. Skip `docker-compose.traefik.yml` and `docker-compose.cloudflared.yml`
-2. Deploy: `docker compose -f docker-compose.arr-stack.yml up -d`
-3. Access via `http://NAS_IP:PORT`
-
+>
+> **DNS/SSL:** Configured for Cloudflare (DNS + Tunnel). Other providers work with modifications to Traefik config. See [Traefik ACME docs](https://doc.traefik.io/traefik/https/acme/).
 
 ## Security
 
