@@ -27,26 +27,36 @@ check_uptime_monitors() {
     local nas_host="yournas.local"
     local nas_user="admin"
 
-    # Check if NAS is reachable
-    if ! timeout 2 ping -c 1 "$nas_host" &>/dev/null; then
+    # Check if NAS is reachable (quick ping, 1 second timeout)
+    if ! ping -c 1 -W 1 "$nas_host" &>/dev/null 2>&1; then
         echo "    SKIP: NAS not reachable"
         return 0
     fi
 
+    # Check if SSH port is open (prevents hanging on firewall blocks)
+    # Uses bash /dev/tcp with 2-second timeout via subshell
+    if ! (exec 3<>/dev/tcp/"$nas_host"/22) 2>/dev/null; then
+        echo "    SKIP: SSH port not reachable"
+        return 0
+    fi
+
     # Get actual monitors from Uptime Kuma
-    # Use timeout to prevent hanging if SSH or docker exec stalls
+    # Use aggressive SSH timeouts to prevent hanging
     # Requires NAS_SSH_PASS env var or SSH key auth
     local actual
+    local ssh_opts="-n -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2 -o ConnectionAttempts=1 -o BatchMode=yes -o LogLevel=ERROR"
+
+    local docker_cmd="docker exec uptime-kuma sqlite3 /app/data/kuma.db \"SELECT name FROM monitor ORDER BY name;\""
+
     if [[ -n "$NAS_SSH_PASS" ]] && command -v sshpass &>/dev/null; then
-        actual=$(timeout 15 sshpass -p "$NAS_SSH_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 "$nas_user@$nas_host" \
-            "docker exec uptime-kuma sqlite3 /app/data/kuma.db \"SELECT name FROM monitor ORDER BY name;\"" 2>/dev/null)
+        actual=$(sshpass -p "$NAS_SSH_PASS" ssh $ssh_opts "$nas_user@$nas_host" "$docker_cmd" 2>/dev/null)
     else
-        actual=$(timeout 15 ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -o BatchMode=yes "$nas_user@$nas_host" \
-            "docker exec uptime-kuma sqlite3 /app/data/kuma.db \"SELECT name FROM monitor ORDER BY name;\"" 2>/dev/null)
+        # Use publickey only to fail fast if no keys configured
+        actual=$(ssh $ssh_opts -o PreferredAuthentications=publickey -o IdentitiesOnly=yes "$nas_user@$nas_host" "$docker_cmd" 2>/dev/null)
     fi
 
     if [[ -z "$actual" ]]; then
-        echo "    SKIP: Could not query Uptime Kuma (set NAS_SSH_PASS or use SSH keys)"
+        echo "    SKIP: Could not query Uptime Kuma (docker access failed)"
         return 0
     fi
 

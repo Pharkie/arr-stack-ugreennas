@@ -112,7 +112,8 @@ This repo includes validation hooks that run on `git commit`:
 | Port/IP conflicts | Yes | Detects duplicate ports or static IPs |
 | Compose drift | Warn | Flags Jellyfin/Plex inconsistencies |
 | Hardcoded domain | Warn | Flags your domain in tracked files |
-| NAS .env backup | Warn | Checks `.env.nas.backup` matches NAS (if reachable) |
+| NAS .env backup | Warn | Checks `.env.nas.backup` matches NAS |
+| Uptime monitors | Warn | Checks Uptime Kuma monitors match services |
 
 ### Install
 
@@ -140,6 +141,29 @@ pip3 install --break-system-packages --user pyyaml
 rm .git/hooks/pre-commit
 ```
 
+### SSH-based Checks (NAS .env backup, Uptime monitors)
+
+The last two checks require SSH access to your NAS. They gracefully skip when:
+- NAS is not reachable (ping fails)
+- SSH port is blocked/closed
+- SSH authentication fails
+
+**To enable these checks:**
+
+1. **SSH key authentication** (recommended):
+   ```bash
+   ssh-copy-id your-user@your-nas.local
+   ```
+
+2. **Docker group membership** (for Uptime monitors check):
+   ```bash
+   # On NAS - allows docker commands without sudo
+   sudo usermod -aG docker your-user
+   # Log out and back in for group change to take effect
+   ```
+
+3. **Alternative: password auth** via `NAS_SSH_PASS` env var (requires `sshpass` installed)
+
 ## Structure
 
 ```
@@ -152,5 +176,6 @@ scripts/
     ├── check-conflicts.sh
     ├── check-compose-drift.sh
     ├── check-hardcoded-domain.sh
-    └── check-env-backup.sh
+    ├── check-env-backup.sh
+    └── check-uptime-monitors.sh
 ```
