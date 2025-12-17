@@ -72,16 +72,16 @@ Ask Claude to help deploy the stack - it reads [`.claude/instructions.md`](.clau
 
 **Admin services** (local-only for security):
 
-| Service | Description | Local Port |
-|---------|-------------|------------|
+| Service | Description | Local |
+|---------|-------------|-------|
 | **Gluetun** | VPN gateway for network privacy | - |
-| **qBittorrent** | BitTorrent client (VueTorrent UI) | 8085 |
-| **Sonarr** | TV show library management | 8989 |
-| **Radarr** | Movie library management | 7878 |
-| **Prowlarr** | Search aggregator | 9696 |
-| **Bazarr** | Subtitle management | 6767 |
-| **Pi-hole** | DNS + Ad-blocking | 53, 8081 |
-| **FlareSolverr** | CAPTCHA solver | 8191 |
+| **qBittorrent** | BitTorrent client (VueTorrent UI) | NAS_IP:8085 |
+| **Sonarr** | TV show library management | NAS_IP:8989 |
+| **Radarr** | Movie library management | NAS_IP:7878 |
+| **Prowlarr** | Search aggregator | NAS_IP:9696 |
+| **Bazarr** | Subtitle management | NAS_IP:6767 |
+| **Pi-hole** | DNS + Ad-blocking | NAS_IP:8081 |
+| **FlareSolverr** | CAPTCHA solver | NAS_IP:8191 |
 
 > **Don't need all these?** Remove any service by deleting its section from the compose file. Core dependency: Gluetun (VPN gateway).
 >
@@ -89,12 +89,12 @@ Ask Claude to help deploy the stack - it reads [`.claude/instructions.md`](.clau
 
 ### `docker-compose.utilities.yml` - Optional Utilities
 
-| Service | Description | Local Access | Remote Access |
-|---------|-------------|--------------|---------------|
-| **deunhealth** | Auto-restart services if VPN drops and recovers | - | Internal |
-| **Uptime Kuma** | Service monitoring dashboard | http://NAS_IP:3001 | Via WireGuard |
-| **duc** | Disk usage analyzer (treemap UI) | http://NAS_IP:8838 | Via WireGuard |
-| **qbit-scheduler** | Pauses torrents overnight (20:00-06:00) for disk spin-down | - | Internal |
+| Service | Description | Local | Remote |
+|---------|-------------|-------|--------|
+| **deunhealth** | Auto-restart services if VPN drops and recovers | - | - |
+| **Uptime Kuma** | Service monitoring dashboard | NAS_IP:3001 | Via WireGuard |
+| **duc** | Disk usage analyzer (treemap UI) | NAS_IP:8838 | Via WireGuard |
+| **qbit-scheduler** | Pauses torrents overnight (20:00-06:00) for disk spin-down | - | - |
 
 ## Deployment Options
 
