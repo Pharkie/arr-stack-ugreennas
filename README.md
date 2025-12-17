@@ -23,7 +23,7 @@ This project provides configuration files for **legal, open-source software** de
 <details>
 <summary>Using Claude Code for guided setup</summary>
 
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code) can walk you through deployment, executing commands and troubleshooting as you go.
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code) can walk you through deployment, executing commands and troubleshooting as you go. Works in terminal, VS Code, or Cursor.
 
 ```bash
 npm install -g @anthropic-ai/claude-code
