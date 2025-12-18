@@ -185,6 +185,24 @@ For HTTPS with self-signed cert or 401 auth page: `ignore_tls=1`, `accepted_stat
 
 **Note:** Services using `network_mode: service:gluetun` (qBittorrent, Sonarr, etc.) should use Gluetun's static IP (`192.168.100.3`) in Uptime Kuma, not the hostname.
 
+## Bash Script Gotchas
+
+**SSH command substitution with `set -e`**: When using `set -e` (exit on error), command substitution causes script exit if the command fails. Add `|| true` to prevent this:
+
+```bash
+# WRONG - script exits if SSH fails
+result=$(ssh_to_nas "some command")
+
+# RIGHT - gracefully handle SSH failure
+result=$(ssh_to_nas "some command") || true
+if [[ -z "$result" ]]; then
+    echo "SKIP: SSH failed"
+    return 0
+fi
+```
+
+This pattern is used in `scripts/lib/check-env-backup.sh` and `check-uptime-monitors.sh`.
+
 ## .env Gotchas
 
 **Bcrypt hashes must be quoted** (they contain `$` which Docker interprets as variables):
