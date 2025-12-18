@@ -388,9 +388,15 @@ docker exec gluetun wget -qO- ifconfig.me
 ### 5.1 qBittorrent
 
 1. **Access:** `http://HOST_IP:8085`
-2. **Default Login:** `admin` / `adminadmin`
-3. **Immediately change password:** Tools → Options → Web UI
-4. **Create categories:** Right-click categories → Add
+2. **Get temporary password** (qBittorrent 4.6.1+ generates a random password):
+   ```bash
+   # Run this on your NAS via SSH:
+   docker logs qbittorrent 2>&1 | grep "temporary password"
+   ```
+   Look for: `A temporary password is provided for this session: <password>`
+3. **Login:** Username `admin`, password from step 2
+4. **Change password immediately:** Tools → Options → Web UI → Authentication
+5. **Create categories:** Right-click categories → Add
    - `sonarr` → Save path: `/downloads/sonarr`
    - `radarr` → Save path: `/downloads/radarr`
 
