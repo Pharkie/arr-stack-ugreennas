@@ -91,36 +91,18 @@ if [ -z "$VOLUME_PREFIX" ]; then
   fi
 fi
 
-# Default backup location
-# Note: /tmp is cleared on reboot - copy tarball off-NAS promptly!
-BACKUP_DIR="${BACKUP_DIR:-/tmp/arr-stack-backup-$(date +%Y%m%d)}"
-
-# Check available space (warn if low, but continue anyway)
-BACKUP_PARENT=$(dirname "$BACKUP_DIR")
-AVAILABLE_MB=$(df -m "$BACKUP_PARENT" 2>/dev/null | awk 'NR==2 {print $4}')
-
-# Estimate required space: check last backup size, or default to 100MB
-LAST_BACKUP=$(find "$BACKUP_PARENT" -maxdepth 1 -name "arr-stack-backup-*.tar.gz" -type f 2>/dev/null | sort | tail -1)
-if [ -n "$LAST_BACKUP" ] && [ -f "$LAST_BACKUP" ]; then
-  REQUIRED_MB=$(( $(stat -f%z "$LAST_BACKUP" 2>/dev/null || stat -c%s "$LAST_BACKUP" 2>/dev/null) / 1024 / 1024 * 2 ))  # 2x last backup
-else
-  REQUIRED_MB=100  # Conservative default for first backup
-fi
-
-if [ -n "$AVAILABLE_MB" ] && [ "$AVAILABLE_MB" -lt "$REQUIRED_MB" ]; then
-  echo "WARNING: Low space on $BACKUP_PARENT (${AVAILABLE_MB}MB available, need ~${REQUIRED_MB}MB)"
-  echo "         Backup may fail if space runs out"
-  echo ""
-fi
-
+# Backup location handling:
+# - Always create backup in /tmp first (reliable space)
+# - If destination specified and different from /tmp, move tarball there after checking space
+FINAL_DEST="${BACKUP_DIR:-}"
+BACKUP_DIR="/tmp/arr-stack-backup-$(date +%Y%m%d)"
 mkdir -p "$BACKUP_DIR"
 
-# Rotate old backups (keep 7 days)
+# Rotate old backups at final destination (keep 7 days)
 KEEP_DAYS=7
-if [ "$BACKUP_PARENT" != "/tmp" ]; then
-  # Only rotate if not backing up to /tmp (which auto-clears)
-  find "$BACKUP_PARENT" -maxdepth 1 -name "arr-stack-backup-*" -type d -mtime +$KEEP_DAYS -exec rm -rf {} \; 2>/dev/null
-  find "$BACKUP_PARENT" -maxdepth 1 -name "arr-stack-backup-*.tar.gz" -type f -mtime +$KEEP_DAYS -delete 2>/dev/null
+if [ -n "$FINAL_DEST" ] && [ -d "$FINAL_DEST" ]; then
+  find "$FINAL_DEST" -maxdepth 1 -name "arr-stack-backup-*" -type d -mtime +$KEEP_DAYS -exec rm -rf {} \; 2>/dev/null
+  find "$FINAL_DEST" -maxdepth 1 -name "arr-stack-backup-*.tar.gz" -type f -mtime +$KEEP_DAYS -delete 2>/dev/null
 fi
 
 # Get current user for ownership fix (avoids needing sudo for tar)
@@ -219,8 +201,26 @@ if [ "$CREATE_TAR" = true ]; then
     -C "$(dirname "$BACKUP_DIR")" \
     "$(basename "$BACKUP_DIR")" 2>/dev/null
 
+  TARBALL_SIZE_BYTES=$(stat -f%z "$TARBALL" 2>/dev/null || stat -c%s "$TARBALL" 2>/dev/null)
+  TARBALL_SIZE_MB=$(( TARBALL_SIZE_BYTES / 1024 / 1024 ))
   TARBALL_SIZE=$(ls -lh "$TARBALL" | awk '{print $5}')
   echo "Created: $TARBALL ($TARBALL_SIZE)"
+
+  # Move to final destination if specified and different from /tmp
+  if [ -n "$FINAL_DEST" ] && [ "$FINAL_DEST" != "/tmp" ]; then
+    AVAILABLE_MB=$(df -m "$FINAL_DEST" 2>/dev/null | awk 'NR==2 {print $4}')
+    REQUIRED_MB=$(( TARBALL_SIZE_MB + 10 ))  # Actual size + 10MB buffer
+
+    if [ -n "$AVAILABLE_MB" ] && [ "$AVAILABLE_MB" -lt "$REQUIRED_MB" ]; then
+      echo ""
+      echo "WARNING: Not enough space at $FINAL_DEST (${AVAILABLE_MB}MB free, need ${REQUIRED_MB}MB)"
+      echo "         Tarball remains in /tmp - copy manually when space available"
+    else
+      FINAL_TARBALL="$FINAL_DEST/arr-stack-backup-$(date +%Y%m%d).tar.gz"
+      mv "$TARBALL" "$FINAL_TARBALL" 2>/dev/null && TARBALL="$FINAL_TARBALL" && echo "Moved to: $TARBALL"
+    fi
+  fi
+
   echo ""
   echo "To copy off-NAS:"
   echo "  # Ugreen NAS (scp doesn't work with /tmp):"
@@ -233,7 +233,9 @@ fi
 # Safety check runs via EXIT trap (ensure_services_running)
 
 echo ""
-echo "NOTE: Backup is in /tmp which is cleared on reboot."
-echo "      Copy the tarball off-NAS before rebooting!"
+if [[ "$TARBALL" == /tmp/* ]] || [ -z "$TARBALL" ]; then
+  echo "NOTE: Backup is in /tmp which is cleared on reboot."
+  echo "      Copy the tarball off-NAS before rebooting!"
+fi
 echo ""
 echo "To restore: docker run --rm -v ./backup/VOLUME:/src:ro -v ${VOLUME_PREFIX}_VOLUME:/dst alpine cp -a /src/. /dst/"
