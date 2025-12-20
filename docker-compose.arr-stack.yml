@@ -412,8 +412,11 @@ services:
     restart: unless-stopped
     logging: *default-logging
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8191/"]
-      interval: 3m
-      timeout: 10s
+      # Actually test Chrome by making a solve request (catches Chrome crashes)
+      test: ["CMD", "curl", "-sf", "-X", "POST", "-H", "Content-Type: application/json",
+             "-d", "{\"cmd\":\"request.get\",\"url\":\"http://localhost:8191/\",\"maxTimeout\":30000}",
+             "http://localhost:8191/v1"]
+      interval: 10m
+      timeout: 60s
       retries: 2
 
