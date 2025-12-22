@@ -649,30 +649,25 @@ LAN_SUBNET=10.10.0.0/24
 LAN_GATEWAY=10.10.0.1
 ```
 
-**Step 2: Exclude the IP from your router's DHCP pool**
+**Step 2: Add DHCP reservation in your router**
 
-Prevent your router from assigning `TRAEFIK_LAN_IP` to other devices:
+The container uses a fixed MAC address (arbitrary, set in `.env` as `TRAEFIK_LAN_MAC`), enabling proper DHCP reservation:
 
 <details>
 <summary>MikroTik</summary>
 
 ```bash
-# Option A: Adjust pool range to skip 10.10.0.11
-/ip pool set [find name=dhcp_pool] ranges=10.10.0.2-10.10.0.10,10.10.0.12-10.10.0.254
-
-# Option B: Block with dummy lease
-/ip dhcp-server lease add address=10.10.0.11 mac-address=00:00:00:00:00:00 comment="Traefik macvlan"
+/ip dhcp-server lease add address=10.10.0.11 mac-address=02:42:0A:0A:00:0B comment="Traefik macvlan" server=dhcp1
 ```
 </details>
 
 <details>
 <summary>Other routers</summary>
 
-- **UniFi/consumer routers:** Set DHCP range to exclude the IP (e.g., start at .12)
-- **pfSense/OPNsense:** Add static mapping with any MAC, or adjust pool range
+- **UniFi:** Settings → Networks → DHCP → Static IP → Add `02:42:0a:0a:00:0b` = `10.10.0.11`
+- **pfSense/OPNsense:** Services → DHCP → Static Mappings → Add
+- **Consumer routers:** DHCP Reservation with MAC `02:42:0a:0a:00:0b`
 </details>
-
-> **Note:** A traditional "DHCP reservation" won't work here because the container's MAC changes on restart. You need to exclude the IP from the pool entirely.
 
 **Step 3: Deploy Traefik with macvlan (on NAS via SSH)**
 ```bash

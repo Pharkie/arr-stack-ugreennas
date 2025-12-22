@@ -12,6 +12,7 @@ services:
       # (NAS owns those ports on its IP, but Traefik owns them on TRAEFIK_LAN_IP)
       traefik-lan:
         ipv4_address: ${TRAEFIK_LAN_IP:-10.10.0.11}
+        mac_address: ${TRAEFIK_LAN_MAC:-02:42:0a:0a:00:0b}
     ports:
       # Dashboard only - HTTP/HTTPS served via macvlan IP on standard ports
       - "9090:8080" # Traefik Dashboard
