@@ -631,6 +631,7 @@ This gives Usenet a 30-minute head start before considering torrents.
 
 1. **Access:** `http://HOST_IP:8081/admin`
 2. **Login:** Use password from `PIHOLE_UI_PASS` (password only, no username)
+3. **Upstream DNS (optional):** Settings → DNS. Default uses Pi-hole's built-in resolver. Set upstream (1.1.1.1, 8.8.8.8) for faster lookups at the cost of sharing queries with that provider.
 
 **Network-wide ad-blocking:** Set your router's DHCP DNS to your NAS IP. Note: if Pi-hole goes down, your network loses DNS. Keep your NAS IP written down for recovery (see [Troubleshooting](TROUBLESHOOTING.md#network-goes-down-when-pi-hole-stops)).
 
