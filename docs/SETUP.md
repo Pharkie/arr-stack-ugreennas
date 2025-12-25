@@ -672,8 +672,6 @@ Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues
 
 ## External Access (Optional)
 
-For local-only access, skip this section. Use `http://NAS_IP:PORT` or [.lan domains](#411-local-dns-lan-domains--optional).
-
 <details>
 <summary><strong>Cloudflare Tunnel Setup</strong></summary>
 
