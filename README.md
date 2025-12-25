@@ -50,81 +50,24 @@ Ask Claude to help deploy the stack - it reads [`.claude/instructions.md`](.clau
 ## Features
 
 **Core Stack**
-- **VPN-protected networking** via Gluetun (supports 30+ providers)
-- **Automated SSL/TLS** certificates via Traefik + Cloudflare
-- **Media library management** with Sonarr, Radarr, Prowlarr, Bazarr
 - **Media streaming** with Jellyfin (or Plex variant available)
-- **Request management** with Jellyseerr (or Overseerr for Plex)
-- **Remote access** via WireGuard VPN server
+- **Automated downloads** with Sonarr (TV), Radarr (movies), Prowlarr (indexers), Bazarr (subtitles)
+- **Request system** via Jellyseerr—let friends/family request titles
+- **VPN-protected** downloads via Gluetun (supports 30+ providers)
+- **Remote streaming** from anywhere via WireGuard VPN server
 - **Ad-blocking DNS** with Pi-hole
-- **Configurable paths** via `MEDIA_ROOT` env var (works on any NAS/server)
+- **Automated SSL** via Traefik + Cloudflare
 
 **Operational**
-- **Backup script** for essential configs (~13MB) - auto-detects setup variant
-- **Auto-recovery** restarts services when VPN reconnects (deunhealth)
+- **Auto-recovery** restarts services when VPN reconnects
+- **Backup script** for essential configs (~13MB)
 - **Service monitoring** with Uptime Kuma dashboard
-- **Torrent scheduler** pauses downloads overnight for NAS disk spin-down
-- **Docker named volumes** for portable, self-contained configs
+- **Torrent scheduler** pauses overnight for disk spin-down
 
 **For Contributors**
-- **Pre-commit hooks** validate secrets, YAML syntax, port conflicts, and more
-- **Claude Code ready** - includes instructions for AI-assisted deployment and troubleshooting
-- See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup
-
-## Services
-
-### `docker-compose.traefik.yml` - Infrastructure
-
-| Service | Description | Local Port | Domain URL |
-|---------|-------------|------------|------------|
-| **Traefik** | Reverse proxy with automatic SSL | 8080, 8443, 9090 | traefik.yourdomain.com |
-
-### `docker-compose.cloudflared.yml` - External Access *(optional - for remote access)*
-
-| Service | Description | Local Port | Domain URL |
-|---------|-------------|------------|------------|
-| **Cloudflared** | Cloudflare Tunnel for remote access | - | Internal |
-
-### `docker-compose.arr-stack.yml` - Media Stack
-
-**User-facing services** (local + remote access if configured):
-
-| Service | Description | Local | Remote (if configured) |
-|---------|-------------|-------|------------------------|
-| **Jellyfin** | Media streaming server | NAS_IP:8096 | jellyfin.yourdomain.com |
-| **Jellyseerr** | Media request system | NAS_IP:5055 | jellyseerr.yourdomain.com |
-| **WireGuard** | VPN server for remote access | NAS_IP:51820/udp | wg.yourdomain.com |
-
-**Admin services** (local-only for security):
-
-| Service | Description | Local |
-|---------|-------------|-------|
-| **Gluetun** | VPN gateway for network privacy | - |
-| **qBittorrent** | BitTorrent client (VueTorrent UI) | NAS_IP:8085 |
-| **SABnzbd** | Usenet download client (via VPN) | NAS_IP:8082 |
-| **Sonarr** | TV show library management | NAS_IP:8989 |
-| **Radarr** | Movie library management | NAS_IP:7878 |
-| **Prowlarr** | Search aggregator | NAS_IP:9696 |
-| **Bazarr** | Subtitle management | NAS_IP:6767 |
-| **Pi-hole** | DNS + Ad-blocking | NAS_IP:8081 |
-| **FlareSolverr** | CAPTCHA solver | NAS_IP:8191 |
-
-> **Don't need all these?** Remove any service by deleting its section from the compose file. Core dependency: Gluetun (VPN gateway).
->
-> **Prefer Plex?** See `docker-compose.plex-arr-stack.yml` for an untested Plex/Overseerr variant.
-
-### `docker-compose.utilities.yml` - Optional Utilities
-
-| Service | Description | Local | Remote |
-|---------|-------------|-------|--------|
-| **deunhealth** | Auto-restart services if VPN drops and recovers | - | - |
-| **Uptime Kuma** | Service monitoring dashboard | NAS_IP:3001 | Via WireGuard |
-| **duc** | Disk usage analyzer (treemap UI) | NAS_IP:8838 | Via WireGuard |
-| **qbit-scheduler** | Pauses torrents overnight (20:00-06:00) for disk spin-down | - | - |
-
-## Security
-
-Admin services (Sonarr, Radarr, etc.) are local-only by design - not exposed via Cloudflare Tunnel. Still recommend enabling auth.
+- **Pre-commit hooks** validate secrets, YAML, port conflicts
+- **Claude Code ready** for AI-assisted deployment
+- See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 

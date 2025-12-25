@@ -21,23 +21,23 @@ Copy this file to `config.local.md` and fill in your values.
 | Cloudflare Account | (your Cloudflare login) |
 | Tunnel Name | `your-tunnel-name` |
 
-## Network (traefik-proxy: 192.168.100.0/24)
+## Network (traefik-proxy: 172.20.0.0/24)
 
 | Service | IP Address |
 |---------|------------|
-| Gateway | 192.168.100.1 |
-| Traefik | 192.168.100.2 |
-| Gluetun | 192.168.100.3 |
-| Jellyfin | 192.168.100.4 |
-| Pi-hole | 192.168.100.5 |
-| WireGuard | 192.168.100.6 |
-| Homarr | 192.168.100.7 |
-| Jellyseerr | 192.168.100.8 |
-| Bazarr | 192.168.100.9 |
-| FlareSolverr | 192.168.100.10 |
-| Notifiarr | 192.168.100.11 |
-| Cloudflared | 192.168.100.12 |
-| Uptime Kuma | 192.168.100.13 |
+| Gateway | 172.20.0.1 |
+| Traefik | 172.20.0.2 |
+| Gluetun | 172.20.0.3 |
+| Jellyfin | 172.20.0.4 |
+| Pi-hole | 172.20.0.5 |
+| WireGuard | 172.20.0.6 |
+| Homarr | 172.20.0.7 |
+| Jellyseerr | 172.20.0.8 |
+| Bazarr | 172.20.0.9 |
+| FlareSolverr | 172.20.0.10 |
+| Notifiarr | 172.20.0.11 |
+| Cloudflared | 172.20.0.12 |
+| Uptime Kuma | 172.20.0.13 |
 
 ## Service URLs
 

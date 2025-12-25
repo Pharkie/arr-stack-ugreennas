@@ -5,11 +5,12 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
+- [Stack Overview](#stack-overview)
 - [Step 1: Create Directories and Clone/Fork Repository](#step-1-create-directories-and-clonefork-repository)
 - [Step 2: Configure Environment](#step-2-configure-environment)
 - [Step 3: External Access (Optional)](#step-3-external-access-optional)
-- [Step 4: Deploy Services](#step-4-deploy-services)
-- [Step 5: Configure Services](#step-5-configure-services)
+- [Step 4: Start the Stack](#step-4-start-the-stack)
+- [Step 5: Configure Each App](#step-5-configure-each-app)
 - [Step 6: Test](#step-6-test)
 - [Backup](#backup)
 - [Optional Utilities](#optional-utilities)
@@ -44,6 +45,55 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 ### For remote access (optional)
 - **Domain Name** (~$8-10/year)
 - **Cloudflare Account** (free tier)
+
+---
+
+## Stack Overview
+
+The stack is split into four Docker Compose files so you can deploy only what you need. See [Quick Reference](REFERENCE.md) for .lan URLs and network details.
+
+| File | Purpose | Required? |
+|------|---------|-----------|
+| `docker-compose.traefik.yml` | Reverse proxy, SSL certificates, .lan domains | Yes |
+| `docker-compose.arr-stack.yml` | Media stack (Jellyfin, *arr apps, downloads) | Yes |
+| `docker-compose.cloudflared.yml` | Remote access via Cloudflare Tunnel | Optional |
+| `docker-compose.utilities.yml` | Monitoring, auto-recovery, disk usage | Optional |
+
+> **Prefer Plex?** Use `docker-compose.plex-arr-stack.yml` instead of `arr-stack` (untested).
+
+### `docker-compose.traefik.yml`
+
+| Service | Description | Port |
+|---------|-------------|------|
+| **Traefik** | Reverse proxy, SSL, .lan domains | 8080, 8443 |
+
+### `docker-compose.arr-stack.yml`
+
+| Service | Description | Port |
+|---------|-------------|------|
+| **Jellyfin** | Media streaming | 8096 |
+| **Jellyseerr** | Request system | 5055 |
+| **Sonarr** | TV management | 8989 |
+| **Radarr** | Movie management | 7878 |
+| **Prowlarr** | Indexer manager | 9696 |
+| **qBittorrent** | Torrent client | 8085 |
+| **SABnzbd** | Usenet client | 8082 |
+| **Bazarr** | Subtitles | 6767 |
+| **Gluetun** | VPN gateway | - |
+| **Pi-hole** | DNS/ad-blocking | 8081 |
+| **WireGuard** | VPN server for remote access | 51820/udp |
+| **FlareSolverr** | CAPTCHA bypass | 8191 |
+
+> **Don't need all these?** Remove any service from the compose file. Core dependency: Gluetun.
+
+### `docker-compose.utilities.yml`
+
+| Service | Description | Port |
+|---------|-------------|------|
+| **deunhealth** | Auto-restart on VPN reconnect | - |
+| **Uptime Kuma** | Monitoring dashboard | 3001 |
+| **duc** | Disk usage treemap | 8838 |
+| **qbit-scheduler** | Pause torrents overnight | - |
 
 ---
 
@@ -165,7 +215,7 @@ sudo chmod 600 /srv/docker/arr-stack/traefik/acme.json
 
 ## Step 2: Configure Environment
 
-### 2.1 Copy Template
+### 2.1 Create .env For Your Config
 
 ```bash
 cp .env.example .env
@@ -184,9 +234,9 @@ MEDIA_ROOT=/srv/media         # Linux server
 
 This path should contain (or will contain) your `downloads`, `tv`, and `movies` subfolders.
 
-### 2.3 VPN Configuration
+### 2.3 Configure VPN
 
-Gluetun supports 30+ VPN providers. Configuration varies by provider.
+Add your VPN credentials to `.env`. Gluetun supports 30+ providers—find yours below:
 
 <details>
 <summary><strong>Surfshark (WireGuard)</strong></summary>
@@ -234,9 +284,9 @@ Update `.env` with your provider's required variables.
 
 </details>
 
-> **Simpler VPN setup (no Pi-hole dependency):** By default, Gluetun uses Pi-hole for DNS, which means it waits for Pi-hole to start. If you want simpler startup, edit `docker-compose.arr-stack.yml` and change `DNS_ADDRESS=192.168.100.5` to `DNS_ADDRESS=1.1.1.1`. Trade-off: VPN DNS queries go to Cloudflare instead of staying local.
+> **Don't want Pi-hole?** Change `DNS_ADDRESS=172.20.0.5` to `DNS_ADDRESS=1.1.1.1` in `docker-compose.arr-stack.yml`.
 
-### 2.4 Service Passwords
+### 2.4 Create Passwords
 
 **Pi-hole Password:**
 
@@ -271,10 +321,10 @@ Add the output to `.env`: `TRAEFIK_DASHBOARD_AUTH=admin:$$apr1$$...`
 
 ## Step 3: External Access (Optional)
 
-For local-only access, skip this section and use URLs like `http://NAS_IP:8096`.
+For local-only access, skip this section. Use `http://NAS_IP:PORT` or set up [.lan domains](#511-local-dns-lan-domains--optional).
 
 <details>
-<summary><strong>Option A: Cloudflare Tunnel (Recommended)</strong></summary>
+<summary><strong>Cloudflare Tunnel Setup</strong></summary>
 
 Cloudflare Tunnel connects outbound from your server, bypassing port forwarding and ISP restrictions. This setup uses the CLI and a local config file (not the Cloudflare web dashboard) for wildcard DNS routing - only 2 DNS records for all services.
 
@@ -325,39 +375,6 @@ docker run --rm -v ./cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflar
 
 </details>
 
-<details>
-<summary><strong>Option B: Port Forwarding + DNS</strong></summary>
-
-Traditional approach - requires your ISP to allow incoming connections.
-
-**1. Cloudflare API Token** (for SSL certificates):
-- Go to: https://dash.cloudflare.com/profile/api-tokens
-- Create Token → Use "Edit zone DNS" template
-- Permissions: `Zone → DNS → Edit` AND `Zone → Zone → Read`
-- Copy token and add to `.env`: `CF_DNS_API_TOKEN=your_token`
-
-**2. DNS Records** in Cloudflare:
-- Add A record: `@` → Your public IP
-- Add CNAME: `*` → `@` (or your DDNS hostname)
-- **Set Proxy Status to "DNS only" (gray cloud)** - this is critical!
-
-**3. Router Port Forwarding:**
-
-| External Port | Internal IP | Internal Port | Protocol |
-|---------------|-------------|---------------|----------|
-| 80 | NAS_IP | 8080 | TCP |
-| 443 | NAS_IP | 8443 | TCP |
-| 51820 | NAS_IP | 51820 | UDP |
-
-> **Ugreen NAS Note:** Ugreen NAS (nginx) uses ports 80/443 and auto-repairs its config. This stack uses Traefik on ports 8080/8443 instead. Configure router to forward external 80→8080 and 443→8443.
-
-**4. Add Domain to .env:**
-```bash
-DOMAIN=yourdomain.com
-```
-
-</details>
-
 ### Update Traefik Config
 
 Copy the example configs and customize with your domain:
@@ -399,7 +416,7 @@ wg:
 
 ---
 
-## Step 4: Deploy Services
+## Step 4: Start the Stack
 
 ### 4.1 Create Docker Network
 
@@ -415,8 +432,8 @@ wg:
 ```bash
 docker network create \
   --driver=bridge \
-  --subnet=192.168.100.0/24 \
-  --gateway=192.168.100.1 \
+  --subnet=172.20.0.0/24 \
+  --gateway=172.20.0.1 \
   traefik-proxy
 ```
 
@@ -454,11 +471,15 @@ docker exec gluetun wget -qO- ifconfig.me
 
 ---
 
-## Step 5: Configure Services
+## Step 5: Configure Each App
 
-> **VPN Network Sharing:** Sonarr, Radarr, Prowlarr, and qBittorrent share Gluetun's network (for VPN protection). They reach each other via `localhost`. Services outside gluetun (Jellyseerr, Bazarr) reach them via `gluetun` hostname or `192.168.100.3`. See [Quick Reference](REFERENCE.md) for details.
+Your stack is running! Now configure each app to work together. They're roughly ordered by dependency.
+
+> **VPN Network Sharing:** Sonarr, Radarr, Prowlarr, and qBittorrent share Gluetun's network (for VPN protection). They reach each other via `localhost`. Services outside gluetun (Jellyseerr, Bazarr) reach them via `gluetun` hostname or `172.20.0.3`. See [Quick Reference](REFERENCE.md) for details.
 
 ### 5.1 qBittorrent
+
+Torrent download client.
 
 1. **Access:** `http://HOST_IP:8085`
 2. **Get temporary password** (qBittorrent 4.6.1+ generates a random password):
@@ -485,11 +506,13 @@ docker exec gluetun wget -qO- ifconfig.me
    - `sonarr` → Save path: `/downloads/sonarr`
    - `radarr` → Save path: `/downloads/radarr`
 
+> **Mobile access?** The default UI is poor on mobile. [VueTorrent](https://github.com/VueTorrent/VueTorrent) is pre-installed—enable it at Tools → Options → Web UI → Use alternative WebUI → `/vuetorrent`.
+
 ### 5.2 SABnzbd (Usenet Downloads) - Optional
 
 Skip this if you only want torrents. SABnzbd provides Usenet downloads as an alternative/complement to qBittorrent.
 
-> **Why route Usenet through VPN?** Defense in depth. Usenet already uses SSL encryption, but routing through VPN adds an extra privacy layer. All download traffic (torrents and Usenet) follows the same secure path through gluetun, simplifying the architecture.
+> **Note:** Usenet is routed through VPN for consistency and an extra layer of security.
 
 1. **Access:** `http://HOST_IP:8082`
 2. **Run Quick-Start Wizard** with your Usenet provider details:
@@ -526,6 +549,8 @@ Skip this if you only want torrents. SABnzbd provides Usenet downloads as an alt
 
 ### 5.3 Prowlarr (Indexer Manager)
 
+Manages torrent/Usenet indexers and syncs them to Sonarr/Radarr.
+
 1. **Access:** `http://HOST_IP:9696`
 2. **Add Torrent Indexers:** Indexers (left sidebar) → + button → search by name
 3. **Add Usenet Indexer** (if using SABnzbd):
@@ -540,7 +565,7 @@ Skip this if you only want torrents. SABnzbd provides Usenet downloads as an alt
 
 4. **Add FlareSolverr** (for protected torrent sites):
    - Settings → Indexers → Add FlareSolverr
-   - Host: `http://flaresolverr:8191` (or `http://192.168.100.10:8191` if hostname fails)
+   - Host: `http://flaresolverr.lan:8191` (or `http://172.20.0.10:8191` if hostname fails)
    - Tag: `flaresolverr`
    - **Note:** FlareSolverr doesn't bypass all Cloudflare protections - some indexers may still fail. Non-protected indexers are more reliable.
 5. **Connect to Sonarr:**
@@ -551,6 +576,8 @@ Skip this if you only want torrents. SABnzbd provides Usenet downloads as an alt
 7. **Sync:** Settings → Apps → Sync App Indexers
 
 ### 5.4 Sonarr (TV Shows)
+
+Automatically searches, downloads, and organizes TV shows.
 
 1. **Access:** `http://HOST_IP:8989`
 2. **Add Root Folder:** Settings → Media Management → `/tv`
@@ -570,6 +597,8 @@ Skip this if you only want torrents. SABnzbd provides Usenet downloads as an alt
    - Category: `tv` (default category in SABnzbd)
 
 ### 5.5 Radarr (Movies)
+
+Automatically searches, downloads, and organizes movies.
 
 1. **Access:** `http://HOST_IP:7878`
 2. **Add Root Folder:** Settings → Media Management → `/movies`
@@ -603,6 +632,8 @@ This gives Usenet a 30-minute head start before considering torrents.
 
 ### 5.7 Jellyfin (Media Server)
 
+Streams your media library to any device.
+
 1. **Access:** `http://HOST_IP:8096`
 2. **Initial Setup:** Create admin account
 3. **Add Libraries:**
@@ -610,6 +641,8 @@ This gives Usenet a 30-minute head start before considering torrents.
    - TV Shows: Content type "Shows", Folder `/media/tv`
 
 ### 5.8 Jellyseerr (Request Manager)
+
+Lets users browse and request movies/TV shows.
 
 1. **Access:** `http://HOST_IP:5055`
 2. **Sign in with Jellyfin:**
@@ -621,59 +654,58 @@ This gives Usenet a 30-minute head start before considering torrents.
 
 ### 5.9 Bazarr (Subtitles)
 
+Automatically downloads subtitles for your media.
+
 1. **Access:** `http://HOST_IP:6767`
 2. **Enable Authentication:** Settings → General → Security → Forms
 3. **Connect to Sonarr:** Settings → Sonarr → `http://gluetun:8989` (Sonarr runs via gluetun)
 4. **Connect to Radarr:** Settings → Radarr → `http://gluetun:7878` (Radarr runs via gluetun)
 5. **Add Providers:** Settings → Providers (OpenSubtitles, etc.)
 
-### 5.10 Pi-hole (DNS/Ad-blocking)
+### 5.10 Pi-hole (DNS)
+
+**Why Pi-hole in this stack?**
+- **DNS for VPN-routed services** — Prowlarr, Sonarr, Radarr etc. use Gluetun's network and need Pi-hole to resolve hostnames like `flaresolverr.lan`
+- **Optional .lan domains** — access services via `http://sonarr.lan` instead of `http://192.168.0.10:8989`
+- **Optional network-wide DNS** — set your router to use Pi-hole for all devices (ad-blocking bonus)
+
+**Setup:**
 
 1. **Access:** `http://HOST_IP:8081/admin`
 2. **Login:** Use password from `PIHOLE_UI_PASS` (password only, no username)
-3. **Upstream DNS:** Settings → DNS → pick upstream servers (1.1.1.1, 8.8.8.8, etc.). Pi-hole forwards queries there after filtering. Note: your upstream provider sees all queries that aren't blocked.
+3. **Upstream DNS:** Settings → DNS → pick upstream servers (1.1.1.1, 8.8.8.8, etc.). Pi-hole forwards queries there. Note: your upstream provider sees all non-blocked queries.
 
-**Network-wide ad-blocking:** Set your router's DHCP DNS to your NAS IP. Note: if Pi-hole goes down, your network loses DNS—keep your NAS IP written down so you can SSH in and restart the stack.
+**Optional: Network-wide DNS.** Set your router's DHCP DNS to your NAS IP.
 
 ### 5.11 Local DNS (.lan domains) — Optional
 
 Access services without remembering port numbers: `http://sonarr.lan` instead of `http://10.10.0.10:8989`.
 
-This works by giving Traefik its own IP on your LAN (via macvlan), where it can use port 80. DNS resolves `.lan` domains to that IP.
+This works by giving Traefik its own IP on your LAN via macvlan (a Docker network type that assigns a real LAN IP to a container). DNS resolves `.lan` domains to that IP.
 
-**Step 1: Add macvlan settings to .env**
+**Step 1: Configure macvlan settings in .env**
 
-Edit `.env` and add:
-```bash
-# Choose an unused IP in your LAN range
-TRAEFIK_LAN_IP=10.10.0.11
-
-# Network interface (check with: ip link show)
-LAN_INTERFACE=eth0
-
-# Your LAN subnet and gateway
-LAN_SUBNET=10.10.0.0/24
-LAN_GATEWAY=10.10.0.1
-```
-
-**Step 2: Add DHCP reservation in your router**
-
-The container uses a fixed MAC address (arbitrary, set in `.env` as `TRAEFIK_LAN_MAC`), enabling proper DHCP reservation:
-
-<details>
-<summary>MikroTik</summary>
+These are already in `.env` (from `.env.example`). Edit the values for your network:
 
 ```bash
-/ip dhcp-server lease add address=10.10.0.11 mac-address=02:42:0A:0A:00:0B comment="Traefik macvlan" server=dhcp1
+TRAEFIK_LAN_IP=10.10.0.11    # Unused IP in your LAN range
+LAN_INTERFACE=eth0            # Network interface (check with: ip link show)
+LAN_SUBNET=10.10.0.0/24       # Your LAN subnet
+LAN_GATEWAY=10.10.0.1         # Your router IP
 ```
-</details>
+
+**Step 2: Reserve the IP in your router**
+
+The container uses a static IP with a fake MAC address (`TRAEFIK_LAN_MAC` in `.env`, default `02:42:0a:0a:00:0b`). Your router doesn't know about it, so add a DHCP reservation to prevent it assigning that IP to another device.
 
 <details>
-<summary>Other routers</summary>
+<summary>Router-specific instructions</summary>
 
-- **UniFi:** Settings → Networks → DHCP → Static IP → Add `02:42:0a:0a:00:0b` = `10.10.0.11`
+- **MikroTik:** `/ip dhcp-server lease add address=10.10.0.11 mac-address=02:42:0a:0a:00:0b comment="Traefik macvlan" server=dhcp1`
+- **UniFi:** Settings → Networks → DHCP → Static IP → Add `02:42:0a:0a:00:0b` → your `TRAEFIK_LAN_IP`
 - **pfSense/OPNsense:** Services → DHCP → Static Mappings → Add
-- **Consumer routers:** DHCP Reservation with MAC `02:42:0a:0a:00:0b`
+- **Consumer routers:** Look for "DHCP Reservation" or "Address Reservation"
+
 </details>
 
 **Step 3: Deploy Traefik with macvlan (on NAS via SSH)**
@@ -704,7 +736,7 @@ docker compose -f docker-compose.arr-stack.yml restart pihole
 
 Configure your router's DHCP to advertise your NAS IP as DNS server. All devices will then use Pi-hole for DNS.
 
-> **Note:** Due to a Linux kernel limitation, you cannot access `http://sonarr.lan` from the NAS itself. This only affects SSH sessions - all other devices (laptop, phone, TV) work perfectly.
+> **Note:** Due to a macvlan limitation, `.lan` domains don't work from the NAS itself (e.g., via SSH). They work from all other devices.
 
 See [REFERENCE.md](REFERENCE.md#local-access-lan-domains) for the full list of `.lan` URLs.
 
@@ -713,15 +745,16 @@ See [REFERENCE.md](REFERENCE.md#local-access-lan-domains) for the full list of `
 ## Step 6: Test
 
 ### VPN Test
+
+Run on NAS via SSH:
 ```bash
-# Should show VPN IP, not your home IP
-docker exec gluetun wget -qO- ifconfig.me
-docker exec qbittorrent wget -qO- ifconfig.me
+docker exec gluetun wget -qO- ifconfig.me       # Should show VPN IP, not your home IP
+docker exec qbittorrent wget -qO- ifconfig.me   # Same - confirms qBit uses VPN
 ```
 
 ### Service Integration Test
 1. Sonarr/Radarr: Settings → Download Clients → Test
-2. Add a TV show or movie you have rights to → verify it appears in qBittorrent
+2. Add a TV show or movie (noting legal restrictions) → verify it appears in qBittorrent
 3. After download completes → verify it moves to library
 4. Jellyfin → verify media appears in library
 
@@ -731,9 +764,9 @@ docker exec qbittorrent wget -qO- ifconfig.me
 
 ---
 
-## Next Steps
+## Setup Done!
 
-Setup complete! Now:
+Now:
 
 1. **Add content:** Search for TV shows in Sonarr, movies in Radarr
 2. **Deploy utilities** (optional): See below
@@ -794,3 +827,49 @@ docker exec qbit-scheduler /app/pause-resume.sh resume  # Start all torrents
 ```bash
 docker logs qbit-scheduler
 ```
+
+---
+
+## Adding More Services
+
+The *arr ecosystem includes other apps you can add using the same pattern:
+
+- **Lidarr** - Music (port 8686)
+- **Readarr** - Ebooks (port 8787)
+
+<details>
+<summary>Example: Adding Lidarr</summary>
+
+1. Add to `docker-compose.arr-stack.yml` volumes section:
+   ```yaml
+   lidarr-config:
+   ```
+
+2. Add port to gluetun:
+   ```yaml
+   - "8686:8686"   # Lidarr
+   ```
+
+3. Add the service:
+   ```yaml
+   lidarr:
+     image: lscr.io/linuxserver/lidarr:latest
+     container_name: lidarr
+     network_mode: "service:gluetun"
+     depends_on:
+       gluetun:
+         condition: service_healthy
+     environment:
+       - PUID=1000
+       - PGID=1000
+       - TZ=${TZ:-Europe/London}
+     volumes:
+       - lidarr-config:/config
+       - ${MEDIA_ROOT:-/volume1/Media}/music:/music
+       - ${MEDIA_ROOT:-/volume1/Media}/downloads:/downloads
+     restart: unless-stopped
+   ```
+
+4. Redeploy: `docker compose -f docker-compose.arr-stack.yml up -d`
+
+</details>

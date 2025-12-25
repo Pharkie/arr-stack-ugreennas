@@ -67,8 +67,8 @@ services:
       - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
       - SERVER_COUNTRIES=${VPN_COUNTRIES:-United Kingdom}
       - TZ=${TZ:-Europe/London}
-      - DNS_ADDRESS=192.168.100.5
-      - FIREWALL_OUTBOUND_SUBNETS=${LAN_SUBNET:-192.168.0.0/24},192.168.100.0/24,10.8.1.0/24
+      - DNS_ADDRESS=172.20.0.5
+      - FIREWALL_OUTBOUND_SUBNETS=${LAN_SUBNET:-192.168.0.0/24},172.20.0.0/24,10.8.1.0/24
     ports:
       # Ports for services using network_mode: "service:gluetun"
       # Enables direct local access without Traefik (http://NAS_IP:PORT)
@@ -79,7 +79,7 @@ services:
       - "8082:8080"   # SABnzbd
     networks:
       traefik-proxy:
-        ipv4_address: 192.168.100.3
+        ipv4_address: 172.20.0.3
       vpn-net:
     restart: unless-stopped
     logging: *default-logging
@@ -237,7 +237,9 @@ services:
     image: jellyfin/jellyfin
     container_name: jellyfin
     ports:
-      - "8096:8096"  # Local network access (all interfaces)
+      - "8096:8096"     # Web UI
+      - "7359:7359/udp" # Client discovery (auto-detect on LAN)
+      - "1900:1900/udp" # DLNA
     environment:
       - TZ=${TZ:-Europe/London}
     volumes:
@@ -247,7 +249,7 @@ services:
       - ${MEDIA_ROOT:-/volume1/Media}/tv:/media/tv:ro
     networks:
       traefik-proxy:
-        ipv4_address: 192.168.100.4
+        ipv4_address: 172.20.0.4
     labels:
       # Routing handled by traefik/dynamic/vpn-services.yml (not Docker labels)
       - "traefik.enable=true"
@@ -273,7 +275,7 @@ services:
       - "8081:80"  # Web UI (local network access)
     networks:
       traefik-proxy:
-        ipv4_address: 192.168.100.5
+        ipv4_address: 172.20.0.5
       vpn-net:
         ipv4_address: 10.8.1.200
     environment:
@@ -324,7 +326,7 @@ services:
       - "51820:51820/udp"
     networks:
         traefik-proxy:
-          ipv4_address: 192.168.100.6
+          ipv4_address: 172.20.0.6
         vpn-net:
           ipv4_address: 10.8.1.3
     cap_add:
@@ -358,7 +360,7 @@ services:
       - PORT=5055
     networks:
       traefik-proxy:
-        ipv4_address: 192.168.100.8
+        ipv4_address: 172.20.0.8
     labels:
       # Routing handled by traefik/dynamic/vpn-services.yml (not Docker labels)
       - "traefik.enable=true"
@@ -390,7 +392,7 @@ services:
       - TZ=${TZ:-Europe/London}
     networks:
       traefik-proxy:
-        ipv4_address: 192.168.100.9
+        ipv4_address: 172.20.0.9
     volumes:
       - bazarr-config:/config
       - ${MEDIA_ROOT:-/volume1/Media}/movies:/movies
@@ -418,7 +420,7 @@ services:
       - TZ=${TZ:-Europe/London}
     networks:
       traefik-proxy:
-        ipv4_address: 192.168.100.10
+        ipv4_address: 172.20.0.10
     labels:
       - deunhealth.restart.on.unhealthy=true
     restart: unless-stopped

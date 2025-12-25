@@ -36,6 +36,46 @@ docker compose -f docker-compose.arr-stack.yml up -d  # Restarts containers with
 
 When upgrading across versions, check below for any action required.
 
+### v1.2.x → v1.3
+
+**Breaking change:** Docker network subnet changed from `192.168.100.0/24` to `172.20.0.0/24`.
+
+Existing users must recreate the network:
+
+```bash
+# Stop all services first
+docker compose -f docker-compose.arr-stack.yml down
+docker compose -f docker-compose.traefik.yml down
+
+# Recreate network with new subnet
+docker network rm traefik-proxy
+docker network create --driver=bridge --subnet=172.20.0.0/24 --gateway=172.20.0.1 traefik-proxy
+
+# Pull and redeploy
+git pull origin main
+docker compose -f docker-compose.traefik.yml up -d
+docker compose -f docker-compose.arr-stack.yml up -d
+```
+
+> **Why the change?** The new `172.20.0.0/24` subnet is a Docker-conventional range, less likely to conflict with home LANs (which often use `192.168.x.x`).
+
+**New features:**
+
+| Feature | What it does |
+|---------|--------------|
+| Jellyfin discovery ports | Apps auto-detect Jellyfin on LAN (7359/udp, 1900/udp) |
+| "Adding More Services" docs | Example for adding Lidarr, Readarr, etc. |
+
+**Documentation improvements:**
+
+- README simplified (services table moved to SETUP.md)
+- SETUP.md restructured with Stack Overview section
+- Section headings now action-oriented
+- Consistent `flaresolverr.lan` usage throughout
+- TROUBLESHOOTING.md removed (notes consolidated into SETUP.md)
+
+---
+
 ### v1.1 → v1.2.x
 
 **Breaking changes:** None

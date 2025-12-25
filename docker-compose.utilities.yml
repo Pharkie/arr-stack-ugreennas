@@ -68,7 +68,7 @@ services:
       - TZ=${TZ:-Europe/London}
     networks:
       traefik-proxy:
-        ipv4_address: 192.168.100.13  # For monitoring other containers
+        ipv4_address: 172.20.0.13  # For monitoring other containers
     volumes:
       - uptime-kuma-data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock:ro  # For Docker container monitoring

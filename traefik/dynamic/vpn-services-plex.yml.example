@@ -33,14 +33,14 @@ http:
     plex:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.4:32400"
+          - url: "http://172.20.0.4:32400"
 
     overseerr:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.8:5055"
+          - url: "http://172.20.0.8:5055"
 
     wg:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.6:51821"
+          - url: "http://172.20.0.6:51821"

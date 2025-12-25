@@ -35,26 +35,26 @@ All other services are **LAN-only** (not exposed to internet).
 
 | Service | IP | Port | Notes |
 |---------|-----|------|-------|
-| Traefik | 192.168.100.2 | 80, 443 | Reverse proxy |
-| **Gluetun** | **192.168.100.3** | — | VPN gateway |
+| Traefik | 172.20.0.2 | 80, 443 | Reverse proxy |
+| **Gluetun** | **172.20.0.3** | — | VPN gateway |
 | ↳ qBittorrent | (via Gluetun) | 8085 | Download client |
 | ↳ Sonarr | (via Gluetun) | 8989 | TV shows |
 | ↳ Radarr | (via Gluetun) | 7878 | Movies |
 | ↳ Prowlarr | (via Gluetun) | 9696 | Indexer manager |
-| Jellyfin | 192.168.100.4 | 8096 | Media server |
-| Pi-hole | 192.168.100.5 | 8081 | DNS ad-blocking (`/admin`) |
-| WireGuard | 192.168.100.6 | 51820/udp | Remote VPN access |
-| Jellyseerr | 192.168.100.8 | 5055 | Request management |
-| Bazarr | 192.168.100.9 | 6767 | Subtitles |
-| FlareSolverr | 192.168.100.10 | 8191 | Cloudflare bypass |
+| Jellyfin | 172.20.0.4 | 8096 | Media server |
+| Pi-hole | 172.20.0.5 | 8081 | DNS ad-blocking (`/admin`) |
+| WireGuard | 172.20.0.6 | 51820/udp | Remote VPN access |
+| Jellyseerr | 172.20.0.8 | 5055 | Request management |
+| Bazarr | 172.20.0.9 | 6767 | Subtitles |
+| FlareSolverr | 172.20.0.10 | 8191 | Cloudflare bypass |
 | ↳ SABnzbd | (via Gluetun) | 8082 | Usenet downloads (VPN) |
 
 **Optional** (utilities.yml / cloudflared.yml):
 
 | Service | IP | Port | Notes |
 |---------|-----|------|-------|
-| Cloudflared | 192.168.100.12 | — | Tunnel (no ports exposed) |
-| Uptime Kuma | 192.168.100.13 | 3001 | Monitoring |
+| Cloudflared | 172.20.0.12 | — | Tunnel (no ports exposed) |
+| Uptime Kuma | 172.20.0.13 | 3001 | Monitoring |
 | duc | — | 8838 | Disk usage (no static IP) |
 
 ### Service Connection Guide
@@ -67,7 +67,7 @@ All other services are **LAN-only** (not exposed to internet).
 | Radarr | qBittorrent | `localhost:8085` | Same network stack |
 | Prowlarr | Sonarr | `localhost:8989` | Same network stack |
 | Prowlarr | Radarr | `localhost:7878` | Same network stack |
-| Prowlarr | FlareSolverr | `flaresolverr:8191` | Docker DNS works |
+| Prowlarr | FlareSolverr | `flaresolverr.lan:8191` | Via Pi-hole DNS |
 | Jellyseerr | Sonarr | `gluetun:8989` | Must go through gluetun |
 | Jellyseerr | Radarr | `gluetun:7878` | Must go through gluetun |
 | Jellyseerr | Jellyfin | `jellyfin:8096` | Both have own IPs |
@@ -76,7 +76,7 @@ All other services are **LAN-only** (not exposed to internet).
 | Sonarr | SABnzbd | `localhost:8080` | Same network stack |
 | Radarr | SABnzbd | `localhost:8080` | Same network stack |
 
-> **Why `gluetun` not `sonarr`?** Services sharing gluetun's network don't get their own Docker DNS entries. Jellyseerr/Bazarr must use `gluetun` hostname (or `192.168.100.3`) to reach them.
+> **Why `gluetun` not `sonarr`?** Services sharing gluetun's network don't get their own Docker DNS entries. Jellyseerr/Bazarr must use `gluetun` hostname (or `172.20.0.3`) to reach them.
 
 ## Common Commands
 
@@ -110,7 +110,7 @@ docker compose -f docker-compose.arr-stack.yml up -d
 
 | Network | Subnet | Purpose |
 |---------|--------|---------|
-| traefik-proxy | 192.168.100.0/24 | Service communication |
+| traefik-proxy | 172.20.0.0/24 | Service communication |
 | vpn-net | 10.8.1.0/24 | Internal VPN routing (WireGuard peers) |
 | traefik-lan | (your LAN)/24 | macvlan - gives Traefik its own LAN IP for .lan domains |
 

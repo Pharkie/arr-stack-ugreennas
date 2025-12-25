@@ -88,61 +88,61 @@ http:
     jellyfin-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.4:8096"
+          - url: "http://172.20.0.4:8096"
 
     jellyseerr-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.8:5055"
+          - url: "http://172.20.0.8:5055"
 
-    # === *arr Stack (via Gluetun at 192.168.100.3) ===
+    # === *arr Stack (via Gluetun at 172.20.0.3) ===
     sonarr-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.3:8989"
+          - url: "http://172.20.0.3:8989"
 
     radarr-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.3:7878"
+          - url: "http://172.20.0.3:7878"
 
     prowlarr-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.3:9696"
+          - url: "http://172.20.0.3:9696"
 
     bazarr-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.9:6767"
+          - url: "http://172.20.0.9:6767"
 
     # === Download Clients (via Gluetun) ===
     qbit-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.3:8085"
+          - url: "http://172.20.0.3:8085"
 
     sabnzbd-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.3:8080"
+          - url: "http://172.20.0.3:8080"
 
     # === Infrastructure ===
     pihole-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.5:80"
+          - url: "http://172.20.0.5:80"
 
     wg-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.6:51821"
+          - url: "http://172.20.0.6:51821"
 
     # === Utilities ===
     uptime-lan:
       loadBalancer:
         servers:
-          - url: "http://192.168.100.13:3001"
+          - url: "http://172.20.0.13:3001"
 
     # duc-lan:
     #   loadBalancer:

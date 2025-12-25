@@ -30,3 +30,6 @@ address=/wg.lan/TRAEFIK_LAN_IP
 # Utilities
 address=/uptime.lan/TRAEFIK_LAN_IP
 # duc.lan disabled - duc not on traefik-proxy network, use http://NAS_IP:8838
+
+# Direct IP (not routed via Traefik)
+address=/flaresolverr.lan/172.20.0.10
