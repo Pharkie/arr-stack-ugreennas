@@ -26,8 +26,8 @@ services:
       test: ["CMD", "cloudflared", "tunnel", "info"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 10s
+      retries: 5
+      start_period: 30s
     labels:
       - "deunhealth.restart.on.unhealthy=true"
     restart: always
