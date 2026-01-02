@@ -84,6 +84,9 @@ Before diving in, decide how you'll access your media stack:
 **Core:**
 - `.env` - VPN credentials, NAS IP, media paths, PUID/PGID
 
+**+ local DNS:**
+- No extra files to edit
+
 **+ remote access:**
 - `traefik/traefik.yml` - Replace `yourdomain.com` (3 places)
 - `traefik/dynamic/vpn-services.yml` - Replace `yourdomain.com`
