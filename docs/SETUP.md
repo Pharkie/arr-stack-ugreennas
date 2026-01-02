@@ -67,13 +67,13 @@ Before diving in, decide how you'll access your media stack:
 
 | Component | What it does | Which setup? |
 |-----------|--------------|--------------|
-| **Gluetun** | VPN container - routes download traffic through VPN so your ISP can't see what you download | Core |
-| **Jellyfin** | Media player - like Netflix but for your own content | Core |
+| **Jellyseerr** | Request portal - users request shows/movies here | Core (recommended) |
 | **Sonarr** | TV show monitor - watches for new episodes, sends to download | Core |
 | **Radarr** | Movie monitor - watches for new movies, sends to download | Core |
 | **Prowlarr** | Indexer manager - finds download sources for Sonarr/Radarr | Core |
 | **qBittorrent** | Torrent client - downloads files (through VPN) | Core |
-| **Jellyseerr** | Request portal - users request shows/movies here | Core (recommended) |
+| **Jellyfin** | Media player - like Netflix but for your own content | Core |
+| **Gluetun** | VPN container - routes download traffic through VPN so your ISP can't see what you download | Core |
 | **Pi-hole** | DNS server - enables `.lan` domains, blocks ads | + local DNS |
 | **Traefik** | Reverse proxy - routes `yourdomain.com` to services, handles HTTPS | + remote access |
 | **Cloudflared** | Tunnel to Cloudflare - secure remote access without port forwarding | + remote access |
