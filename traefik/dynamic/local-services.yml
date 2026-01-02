@@ -22,10 +22,11 @@ http:
       entryPoints: [web]
       service: jellyseerr-lan
 
-    # Typo aliases (jellyseer/overseer -> jellyseerr/overseerr)
+    # Typo redirects (jellyseer -> jellyseerr)
     jellyseer-lan:
       rule: "Host(`jellyseer.lan`)"
       entryPoints: [web]
+      middlewares: [jellyseer-redirect]
       service: jellyseerr-lan
 
     # === *arr Stack (VPN-protected via Gluetun) ===
@@ -86,6 +87,13 @@ http:
       rule: "Host(`duc.lan`)"
       entryPoints: [web]
       service: duc-lan
+
+  middlewares:
+    jellyseer-redirect:
+      redirectRegex:
+        regex: "^http://jellyseer[.]lan(.*)"
+        replacement: "http://jellyseerr.lan${1}"
+        permanent: true
 
   services:
     # === Media Services ===
