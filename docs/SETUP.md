@@ -21,12 +21,12 @@ Complete setup guide for the media automation stack. Works on any Docker host wi
 
 | Doc | Purpose |
 |-----|---------|
-| [Architecture](ARCHITECTURE.md) | How services connect, network layout |
-| [Quick Reference](REFERENCE.md) | URLs, commands, IPs |
-| [Upgrading](UPGRADING.md) | Pull updates, redeploy |
-| [Backup & Restore](BACKUP.md) | Backup configs, restore |
-| [Home Assistant](HOME-ASSISTANT.md) | Notifications integration |
-| [Legal](LEGAL.md) | Intended use, disclaimer |
+| [Architecture](ARCHITECTURE.md) | Understand how the stack fits together |
+| [Quick Reference](REFERENCE.md) | Cheat sheet: all URLs, ports, IPs, common commands |
+| [Upgrading](UPGRADING.md) | How to pull updates and redeploy |
+| [Backup & Restore](BACKUP.md) | Backup your configs, restore after disaster |
+| [Home Assistant](HOME-ASSISTANT.md) | Get notifications when downloads complete |
+| [Legal](LEGAL.md) | What this software is for, disclaimer |
 
 ---
 
