@@ -400,14 +400,10 @@ docker network create \
 ### 3.2 Deploy
 
 ```bash
-# Deploy Traefik (reverse proxy)
-docker compose -f docker-compose.traefik.yml up -d
-
-# Deploy media stack
 docker compose -f docker-compose.arr-stack.yml up -d
 ```
 
-> **Want external access?** See [External Access](#external-access-optional) after completing setup.
+> **Adding .lan domains or remote access?** Deploy Traefik later in those sections.
 
 ### 3.3 Verify Deployment
 
@@ -713,15 +709,10 @@ The container uses a static IP with a fake MAC address (`TRAEFIK_LAN_MAC` in `.e
 
 </details>
 
-**Step 3: Deploy Traefik with macvlan (on NAS via SSH)**
+**Step 3: Deploy Traefik (on NAS via SSH)**
 ```bash
 cd /volume1/docker/arr-stack
 
-# Pull latest config
-git pull origin main
-
-# Restart Traefik with new macvlan network
-docker compose -f docker-compose.traefik.yml down
 docker compose -f docker-compose.traefik.yml up -d
 ```
 
