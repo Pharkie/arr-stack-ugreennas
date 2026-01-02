@@ -33,7 +33,8 @@ Works on Ugreen, Synology, QNAP, or any Docker host.
 **The flow:** Someone requests a show → it downloads automatically → appears in your media library.
 
 ```
-Jellyseerr (request) → Sonarr/Radarr (monitor) → Prowlarr (search) → qBittorrent (download) → Jellyfin (watch)
+Jellyseerr (request) → Sonarr/Radarr (monitor) → Prowlarr (search)
+    → qBittorrent (download) → Jellyfin (watch)
 ```
 
 **VPN protection:** Downloads go through your VPN (via Gluetun). Streaming doesn't need VPN—you're watching your own files.
