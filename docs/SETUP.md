@@ -305,8 +305,8 @@ Edit `.env` with your VPN credentials. Gluetun supports 30+ providers—find you
 7. Open the downloaded `.conf` file and note the `Address` value:
    ```ini
    [Interface]
-   Address = 10.14.0.2/16          ← Copy this
-   PrivateKey = (already copied)
+   Address = 10.14.0.2/16
+   PrivateKey = aBcDeFgHiJkLmNoPqRsTuVwXyZ...
    ```
 
 8. Add to `.env`:
