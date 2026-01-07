@@ -974,13 +974,13 @@ Other *arr apps you can add to your Core stack:
        gluetun:
          condition: service_healthy
      environment:
-       - PUID=1000
-       - PGID=1000
-       - TZ=${TZ:-Europe/London}
+       - PUID=${PUID}
+       - PGID=${PGID}
+       - TZ=${TZ}
      volumes:
        - lidarr-config:/config
-       - ${MEDIA_ROOT:-/volume1/Media}/music:/music
-       - ${MEDIA_ROOT:-/volume1/Media}/downloads:/downloads
+       - ${MEDIA_ROOT}/music:/music
+       - ${MEDIA_ROOT}/downloads:/downloads
      restart: unless-stopped
    ```
 

@@ -64,6 +64,23 @@ rm -f traefik/acme.json
 
 ---
 
+### v1.4.4 → v1.4.5
+
+**Breaking change:** Removed all env var fallbacks from compose files.
+
+Previously, compose files had fallbacks like `${MEDIA_ROOT:-/volume1/Media}`. Now they use `${MEDIA_ROOT}` — if a variable is missing from `.env`, Docker will fail with a clear error instead of silently using a default.
+
+**Action required:** Ensure your `.env` has all required variables. If you copied from `.env.example` when you first set up, you're fine. If not:
+
+```bash
+# Check for missing variables
+diff <(grep -oP '^\$\{[A-Z_]+\}' docker-compose.arr-stack.yml | sort -u) <(grep -oP '^[A-Z_]+=' .env | cut -d= -f1 | sort -u)
+```
+
+Or just copy the latest `.env.example` and fill in your values.
+
+---
+
 ### v1.3 → v1.4
 
 **Network renamed:** `traefik-proxy` → `arr-stack`
@@ -148,14 +165,14 @@ echo "Migration complete"
 | Feature | What it does | Setup |
 |---------|--------------|-------|
 | `.lan` domains | `http://sonarr.lan` etc, no ports | Router DHCP reservation + Pi-hole DNS, see [SETUP.md](SETUP.md#local-dns-lan-domains---optional) |
-| `MEDIA_ROOT` env var | Configurable media path | Add to `.env` if not using `/volume1/Media` |
+| `MEDIA_ROOT` env var | Configurable media path | Set in `.env` |
 | deunhealth | Auto-restart crashed services | Deploy `docker-compose.utilities.yml` |
 
 **New .env variables:**
 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
-| `MEDIA_ROOT` | No | `/volume1/Media` | Base path for media storage |
+| `MEDIA_ROOT` | Yes | — | Base path for media storage |
 | `TRAEFIK_LAN_IP` | Only for .lan | — | Traefik's dedicated LAN IP for local DNS |
 | `LAN_INTERFACE` | Only for .lan | — | Network interface (e.g., `eth0`) |
 | `LAN_SUBNET` | Only for .lan | — | Your LAN subnet (e.g., `10.10.0.0/24`) |
