@@ -40,6 +40,7 @@ source "$SCRIPT_DIR/lib/check-compose-drift.sh"
 source "$SCRIPT_DIR/lib/check-hardcoded-domain.sh"
 source "$SCRIPT_DIR/lib/check-env-backup.sh"
 source "$SCRIPT_DIR/lib/check-uptime-monitors.sh"
+source "$SCRIPT_DIR/lib/check-release-status.sh"
 
 # Track results
 ERRORS=0
@@ -130,6 +131,13 @@ echo ""
 # ==========================================
 echo -e "${BLUE}8. Checking Uptime Kuma monitors...${NC}"
 check_uptime_monitors
+echo ""
+
+# ==========================================
+# CHECK 9: GitHub Release Status (WARNS)
+# ==========================================
+echo -e "${BLUE}9. Checking GitHub release status...${NC}"
+check_release_status
 echo ""
 
 # ==========================================
