@@ -385,6 +385,9 @@ docker network create \
 ### 3.2 Deploy
 
 ```bash
+# Create empty config file (+ local DNS users will overwrite this later)
+touch pihole/02-local-dns.conf
+
 docker compose -f docker-compose.arr-stack.yml up -d
 ```
 
