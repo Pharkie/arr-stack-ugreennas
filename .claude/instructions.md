@@ -375,8 +375,6 @@ TRAEFIK_DASHBOARD_AUTH='admin:$2y$05$abc...'
 
 ## GitHub Releases
 
-**Release retention policy:** Only keep major point releases (v1.4, v1.5, v1.6) and the current latest minor (e.g., v1.5.2). Delete intermediate patch releases (v1.5.1) when superseded. This keeps the release list clean while preserving meaningful milestones.
-
 When creating release notes:
 - Link to `docs/UPGRADING.md` for upgrade instructions instead of inline steps
 - Keep notes concise - bullet points, not paragraphs
