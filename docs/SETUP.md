@@ -916,6 +916,36 @@ Some NAS systems (like Ugreen) may reset `/etc/sysctl.conf` on firmware updates.
 
 </details>
 
+<details>
+<summary><strong>Using the tunnel for other services</strong></summary>
+
+The tunnel config uses a wildcard (`*.yourdomain.com`) that routes all subdomains to Traefik. To route specific subdomains to other services, add hostname rules **before** the wildcard (rules are evaluated top-to-bottom, first match wins):
+
+```yaml
+ingress:
+  # Specific routes first
+  - hostname: homeassistant.yourdomain.com
+    service: http://homeassistant:8123
+  - hostname: blog.yourdomain.com
+    service: http://192.168.1.100:80
+
+  # Then wildcard for media stack
+  - hostname: "*.yourdomain.com"
+    service: http://traefik:80
+  - hostname: yourdomain.com
+    service: http://traefik:80
+  - service: http_status:404
+```
+
+Add DNS records for the new hostnames:
+```bash
+docker run --rm -v ./cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared tunnel route dns nas-tunnel homeassistant.yourdomain.com
+```
+
+**Tip:** For Docker containers on the `arr-stack` network, use the container name as hostname. For services outside Docker, use the IP address.
+
+</details>
+
 ### Test Cloudflare Tunnel
 
 From your phone on cellular data (not WiFi):
