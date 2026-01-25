@@ -468,11 +468,15 @@ If transcoding framerate is only ~1x (24-30 fps), hardware acceleration isn't wo
 <details>
 <summary><strong>Kodi for Fire TV (Dolby Vision / TrueHD Atmos passthrough)</strong></summary>
 
-**Why Kodi instead of the Jellyfin app?**
+**When to use Kodi instead of the Jellyfin app:**
 
-The Jellyfin Android TV app uses ExoPlayer which doesn't properly support audio/video passthrough. Even if your Fire TV and AV receiver support Dolby Vision and TrueHD Atmos, the app will transcode instead of passing through - causing high CPU load and degraded quality.
+The Jellyfin Android TV app works well for most content. However, it may not properly pass through advanced audio/video formats to your AV receiver. If you're experiencing:
 
-Kodi with the Jellyfin add-on properly passes through everything to your receiver.
+- High CPU usage / transcoding on 4K HDR or Dolby Vision content
+- Audio being converted instead of passing through TrueHD Atmos or DTS-HD
+- Playback stuttering or buffering on high-bitrate files
+
+...try **Kodi with the Jellyfin add-on** instead. Kodi handles passthrough more reliably on Fire TV devices.
 
 **Step 1: Install Kodi on Fire TV (sideload via ADB)**
 
