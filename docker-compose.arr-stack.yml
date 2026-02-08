@@ -294,14 +294,12 @@ services:
     image: pihole/pihole:2025.11.1
     container_name: pihole
     ports:
-      - "${NAS_IP}:53:53/tcp"  # Bind to NAS IP to avoid conflict with localhost dnsmasq
-      - "${NAS_IP}:53:53/udp"
+      - "${NAS_IP}:53:53/tcp"  # Bind to NAS IP (not 0.0.0.0) to avoid conflict with host dnsmasq on 127.0.0.1:53
+      - "${NAS_IP}:53:53/udp"  # NAS_IP MUST be a static IP — DHCP IPs aren't ready at boot, causing exit 128
       - "8081:80"  # Web UI (local network access)
     networks:
       arr-stack:
         ipv4_address: 172.20.0.5
-      vpn-net:
-        ipv4_address: 10.8.1.200
     environment:
       - TZ=${TZ}
       - FTLCONF_webserver_api_password=${PIHOLE_UI_PASS}

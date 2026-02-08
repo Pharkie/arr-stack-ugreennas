@@ -545,6 +545,20 @@ Now 4K Dolby Vision + TrueHD Atmos content will direct play without transcoding.
 
 </details>
 
+#### RAID5 Streaming Tuning
+
+If you're using RAID5 with spinning HDDs and experience playback stuttering on large files (especially 4K remuxes), the default read-ahead buffer is too small. Apply this tuning on your NAS:
+
+```bash
+sudo bash -c '
+echo 4096 > /sys/block/md1/queue/read_ahead_kb
+echo 4096 > /sys/block/dm-0/queue/read_ahead_kb
+echo 4096 > /sys/block/md1/md/stripe_cache_size
+'
+```
+
+Add the same lines to `/etc/rc.local` to persist across reboots. See [Troubleshooting: Jellyfin Video Stutters](TROUBLESHOOTING.md#jellyfin-video-stuttersfreezes-every-few-minutes) for full details.
+
 ### 4.2 qBittorrent (Torrent Downloads)
 
 Receives download requests from Sonarr and Radarr and downloads files via torrents.
@@ -749,6 +763,8 @@ This gives Usenet a 30-minute head start before considering torrents.
 > **Note:** Do this in both Sonarr and Radarr (same steps in each).
 
 ### 4.10 Pi-hole (DNS)
+
+> **Prerequisite: Static IP required.** Pi-hole binds to `NAS_IP` at boot. If the IP comes from DHCP, Docker starts before it's assigned and Pi-hole fails every reboot. Check: `ip addr show eth0` — if you see `dynamic`, it's DHCP and needs fixing. See [Troubleshooting: Pi-hole doesn't start after reboot](TROUBLESHOOTING.md#pi-hole-doesnt-start-after-reboot).
 
 1. **Access:** `http://NAS_IP:8081/admin`
 2. **Login:** Use password from `PIHOLE_UI_PASS` (password only, no username)

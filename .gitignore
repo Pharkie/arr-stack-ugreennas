@@ -93,7 +93,9 @@ venv/
 env/
 ENV/
 
-# Personal Notes
+# Personal Notes & Local Docs
 notes.md
 TODO.md
 scratch/
+docs/RAM-UPGRADE-BASELINE.md
+docs/*-BASELINE*.md
