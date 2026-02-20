@@ -1,12 +1,12 @@
 # Traefik routing for media stack services
 #
 # REMOTE ACCESS (via Cloudflare Tunnel):
-# - Jellyfin, Jellyseerr - user-facing services
+# - Jellyfin, Seerr - user-facing services
 #
 # LOCAL-ONLY (access via NAS_IP:PORT or .lan domains):
 # - Sonarr, Radarr, Prowlarr, qBittorrent, Bazarr, Pi-hole
 # - These have weak default auth ("Disabled for Local" / "Bypass localhost")
-# - Use Jellyseerr for remote media requests instead
+# - Use Seerr for remote media requests instead
 
 http:
   routers:
@@ -16,26 +16,34 @@ http:
         - web
       service: jellyfin
 
-    jellyseerr:
+    seerr:
+      rule: "Host(`seerr.yourdomain.com`)"
+      entryPoints:
+        - web
+      service: seerr
+
+    # Legacy redirects (jellyseerr/jellyseer → seerr)
+    jellyseerr-external:
       rule: "Host(`jellyseerr.yourdomain.com`)"
       entryPoints:
         - web
-      service: jellyseerr
+      middlewares:
+        - jellyseerr-redirect-external
+      service: seerr
 
-    # Optional: Redirect common typo (jellyseer -> jellyseerr)
-    jellyseer-typo:
+    jellyseer-external:
       rule: "Host(`jellyseer.yourdomain.com`)"
       entryPoints:
         - web
       middlewares:
-        - jellyseer-redirect-external
-      service: jellyseerr
+        - jellyseerr-redirect-external
+      service: seerr
 
   middlewares:
-    jellyseer-redirect-external:
+    jellyseerr-redirect-external:
       redirectRegex:
-        regex: "^https?://jellyseer[.](.+)"
-        replacement: "https://jellyseerr.${1}"
+        regex: "^https?://jellyseer{1,2}[.](.+)"
+        replacement: "https://seerr.${1}"
         permanent: true
 
   services:
@@ -44,7 +52,7 @@ http:
         servers:
           - url: "http://172.20.0.4:8096"
 
-    jellyseerr:
+    seerr:
       loadBalancer:
         servers:
           - url: "http://172.20.0.8:5055"

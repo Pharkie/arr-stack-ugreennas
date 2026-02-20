@@ -158,11 +158,11 @@ If auto-detection fails, use `--prefix`:
 ./scripts/backup-volumes.sh --tar --prefix media-stack
 ```
 
-### Jellyfin vs Plex
+### Request Manager Detection
 
-The script auto-detects which variant you're using and backs up the appropriate request manager:
-- Jellyfin stack: `jellyseerr-config`
-- Plex stack: `overseerr-config`
+The script auto-detects which request manager volume exists and backs it up:
+- `jellyseerr-config` (Seerr / Jellyseerr)
+- `overseerr-config` (Overseerr, if used instead)
 
 ---
 

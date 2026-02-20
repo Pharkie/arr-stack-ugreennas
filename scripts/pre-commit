@@ -36,7 +36,6 @@ source "$SCRIPT_DIR/lib/check-secrets.sh"
 source "$SCRIPT_DIR/lib/check-env-vars.sh"
 source "$SCRIPT_DIR/lib/check-yaml-syntax.sh"
 source "$SCRIPT_DIR/lib/check-conflicts.sh"
-source "$SCRIPT_DIR/lib/check-compose-drift.sh"
 source "$SCRIPT_DIR/lib/check-hardcoded-domain.sh"
 source "$SCRIPT_DIR/lib/check-env-backup.sh"
 source "$SCRIPT_DIR/lib/check-uptime-monitors.sh"
@@ -108,51 +107,44 @@ fi
 echo ""
 
 # ==========================================
-# CHECK 5: Compose Drift (WARNS)
+# CHECK 5: Hardcoded Domain (WARNS)
 # ==========================================
-echo -e "${BLUE}5. Checking Jellyfin/Plex consistency...${NC}"
-check_compose_drift
-echo ""
-
-# ==========================================
-# CHECK 6: Hardcoded Domain (WARNS)
-# ==========================================
-echo -e "${BLUE}6. Checking for hardcoded domain...${NC}"
+echo -e "${BLUE}5. Checking for hardcoded domain...${NC}"
 check_hardcoded_domain
 echo ""
 
 # ==========================================
-# CHECK 7: NAS .env Backup Sync (WARNS)
+# CHECK 6: NAS .env Backup Sync (WARNS)
 # ==========================================
-echo -e "${BLUE}7. Checking .env.nas.backup sync...${NC}"
+echo -e "${BLUE}6. Checking .env.nas.backup sync...${NC}"
 check_env_backup
 echo ""
 
 # ==========================================
-# CHECK 8: Uptime Kuma Monitors (WARNS)
+# CHECK 7: Uptime Kuma Monitors (WARNS)
 # ==========================================
-echo -e "${BLUE}8. Checking Uptime Kuma monitors...${NC}"
+echo -e "${BLUE}7. Checking Uptime Kuma monitors...${NC}"
 check_uptime_monitors
 echo ""
 
 # ==========================================
-# CHECK 9: DNS Duplicates (WARNS)
+# CHECK 8: DNS Duplicates (WARNS)
 # ==========================================
-echo -e "${BLUE}9. Checking for duplicate .lan domains...${NC}"
+echo -e "${BLUE}8. Checking for duplicate .lan domains...${NC}"
 check_dns_duplicates
 echo ""
 
 # ==========================================
-# CHECK 10: Domain Accessibility (WARNS)
+# CHECK 9: Domain Accessibility (WARNS)
 # ==========================================
-echo -e "${BLUE}10. Checking domain accessibility...${NC}"
+echo -e "${BLUE}9. Checking domain accessibility...${NC}"
 check_domains
 echo ""
 
 # ==========================================
-# CHECK 11: Image Version Staleness (WARNS)
+# CHECK 10: Image Version Staleness (WARNS)
 # ==========================================
-echo -e "${BLUE}11. Checking for image updates...${NC}"
+echo -e "${BLUE}10. Checking for image updates...${NC}"
 # Timeout after 30s to prevent slow registries from blocking commits
 _timeout_cmd=""
 command -v timeout &>/dev/null && _timeout_cmd="timeout"

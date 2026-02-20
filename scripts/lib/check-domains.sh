@@ -29,6 +29,7 @@ check_domains() {
     # .lan domains to check (via Pi-hole DNS)
     local lan_domains=(
         "jellyfin.lan"
+        "seerr.lan"
         "jellyseerr.lan"
         "sonarr.lan"
         "radarr.lan"
@@ -67,7 +68,7 @@ check_domains() {
     if [[ -n "$domain" ]]; then
         local external_domains=(
             "jellyfin.$domain"
-            "jellyseerr.$domain"
+            "seerr.$domain"
         )
 
         echo "    Checking external domains..."

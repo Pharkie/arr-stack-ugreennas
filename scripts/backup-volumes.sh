@@ -181,7 +181,7 @@ VOLUME_SUFFIXES=(
   pihole-etc-dnsmasq      # Custom DNS settings (small)
 )
 
-# Request manager - detect which variant is in use (Jellyfin or Plex)
+# Request manager - detect which volume exists
 if docker volume inspect "${VOLUME_PREFIX}_jellyseerr-config" &>/dev/null; then
   VOLUME_SUFFIXES+=(jellyseerr-config)
 elif docker volume inspect "${VOLUME_PREFIX}_overseerr-config" &>/dev/null; then
@@ -190,7 +190,6 @@ fi
 
 # Large volumes excluded by default (regenerate by re-scanning/re-downloading):
 #   jellyfin-config (407MB) - library metadata, watch history (re-scan to rebuild)
-#   plex-config             - same as above for Plex variant
 #   sonarr-config (43MB)    - series database (re-scan to rebuild)
 #   radarr-config (110MB)   - movie database (re-scan to rebuild)
 #   pihole-etc-pihole (138MB) - blocklists auto-download on startup

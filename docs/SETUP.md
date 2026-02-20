@@ -73,7 +73,7 @@ Here's what you'll need to get started.
 
 | Component | What it does | Which setup? |
 |-----------|--------------|--------------|
-| **Jellyseerr** | Request portal - users request shows/movies here | Core |
+| **Seerr** | Request portal - users request shows/movies here | Core |
 | **Jellyfin** | Media player - like Netflix but for your own content | Core |
 | **Sonarr** | TV show manager - searches for episodes, sends to download client | Core |
 | **Radarr** | Movie manager - searches for movies, sends to download client | Core |
@@ -113,7 +113,21 @@ Here's what you'll need to get started.
 
 See [Quick Reference](REFERENCE.md) for full service lists, .lan URLs, and network details.
 
-> **Prefer Plex?** Use `docker-compose.plex-arr-stack.yml` instead of `arr-stack` (untested).
+<details>
+<summary><strong>Prefer Plex over Jellyfin?</strong></summary>
+
+This stack uses Jellyfin, but you can swap to Plex by modifying `docker-compose.arr-stack.yml`:
+
+1. **Replace the Jellyfin service** with Plex (`lscr.io/linuxserver/plex`), port `32400`, and add `PLEX_CLAIM` env var (get from https://plex.tv/claim)
+2. **Replace the Seerr service** with Overseerr if preferred (Seerr supports both Jellyfin and Plex)
+3. **Update volumes**: `jellyfin-config`/`jellyfin-cache` → `plex-config`
+4. **Update Traefik routes**: `jellyfin.lan`/`jellyfin.yourdomain.com` → `plex.lan`/`plex.yourdomain.com`, point to port `32400`
+5. **Update Pi-hole DNS**: add `plex.lan` entry
+6. **Remove hardware transcoding** lines (`devices`, `group_add`) unless you configure Plex hardware transcoding separately
+
+This is not tested or supported — you're on your own.
+
+</details>
 
 ---
 
@@ -721,7 +735,7 @@ Manages torrent/Usenet indexers and syncs them to Sonarr/Radarr.
 6. **Connect to Radarr:** Same process with `http://localhost:7878`
 7. **Sync:** Settings → Apps → Sync App Indexers
 
-### 4.7 Jellyseerr (Request Manager)
+### 4.7 Seerr (Request Manager)
 
 Lets users browse and request movies/TV shows.
 
@@ -809,7 +823,7 @@ Compare the IPs — qBittorrent should show your VPN's IP, not your home IP.
 **Congratulations!** Your media stack is working. You can now:
 - Access services via `NAS_IP:port` (e.g., `192.168.1.50:8096` for Jellyfin)
 - Add content via Sonarr (TV) and Radarr (movies)
-- Request content via Jellyseerr
+- Request content via Seerr
 
 **What's next?**
 - **Stop here** if IP:port access is fine for you
@@ -909,7 +923,7 @@ Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues
 
 ## + remote access — Optional
 
-Watch and request media from anywhere via `jellyfin.yourdomain.com` and `jellyseerr.yourdomain.com`.
+Watch and request media from anywhere via `jellyfin.yourdomain.com` and `seerr.yourdomain.com`.
 
 **Requirements:**
 - Buy a new, external domain name (~$10/year) — [Cloudflare Registrar](https://www.cloudflare.com/products/registrar/) is simplest
@@ -972,8 +986,6 @@ Copy the example configs and customize with your domain:
 # Copy example configs
 cp traefik/traefik.yml.example traefik/traefik.yml
 cp traefik/dynamic/vpn-services.yml.example traefik/dynamic/vpn-services.yml
-# Or for Plex:
-# cp traefik/dynamic/vpn-services-plex.yml.example traefik/dynamic/vpn-services-plex.yml
 ```
 
 Edit `traefik/dynamic/vpn-services.yml` and replace the Host rules:
@@ -982,8 +994,8 @@ Edit `traefik/dynamic/vpn-services.yml` and replace the Host rules:
 # Replace yourdomain.com with your actual domain
 jellyfin:
   rule: "Host(`jellyfin.yourdomain.com`)"  # ← your domain
-jellyseerr:
-  rule: "Host(`jellyseerr.yourdomain.com`)"  # ← your domain
+seerr:
+  rule: "Host(`seerr.yourdomain.com`)"  # ← your domain
 ```
 
 > **Note:** The `.yml` files are gitignored. Your customized configs won't be overwritten when you `git pull` updates.
@@ -1055,13 +1067,13 @@ From your phone on cellular data (not WiFi):
 ## ✅ + remote access Complete!
 
 **Congratulations!** You now have:
-- Jellyfin and Jellyseerr accessible from anywhere via `yourdomain.com`
+- Jellyfin and Seerr accessible from anywhere via `yourdomain.com`
 - HTTPS encryption for all external traffic
 - No ports exposed on your router
 
 **You're done!** The sections below (Backup, Utilities) are optional but recommended.
 
-> **Need full network access remotely?** Cloudflare Tunnel only exposes HTTP services (Jellyfin, Jellyseerr). If you need to access admin UIs (Sonarr, Radarr, etc.) or `.lan` domains from outside your home, look into [Tailscale](https://tailscale.com/) — it's free for personal use and works even behind CGNAT. Setup is not covered here.
+> **Need full network access remotely?** Cloudflare Tunnel only exposes HTTP services (Jellyfin, Seerr). If you need to access admin UIs (Sonarr, Radarr, etc.) or `.lan` domains from outside your home, look into [Tailscale](https://tailscale.com/) — it's free for personal use and works even behind CGNAT. Setup is not covered here.
 
 Issues? [Report on GitHub](https://github.com/Pharkie/arr-stack-ugreennas/issues) or [chat on Reddit](https://www.reddit.com/user/Jeff46K4/).
 
@@ -1198,8 +1210,8 @@ Other *arr apps you can add to your Core stack:
    # Add Traefik route to traefik/dynamic/local-services.yml
    # (router + service, see existing entries as template)
 
-   # Reload DNS
-   docker exec pihole pihole reloaddns
+   # Restart Pi-hole to pick up bind-mount changes (reloaddns alone is NOT enough)
+   docker restart pihole
    ```
 
 </details>

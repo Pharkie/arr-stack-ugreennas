@@ -5,19 +5,9 @@ setup() {
     load helpers/setup
 }
 
-# arr-stack and plex-arr-stack are alternative stacks (use one or the other)
-# so we exclude plex-arr-stack from cross-file duplicate checks
-get_non_alternative_compose_files() {
-    for f in $(get_compose_files); do
-        # Skip plex variant (it intentionally mirrors arr-stack IPs/ports)
-        [[ "$(basename "$f")" == "docker-compose.plex-arr-stack.yml" ]] && continue
-        echo "$f"
-    done
-}
-
-@test "no duplicate ports across compose files (excluding alternative stacks)" {
+@test "no duplicate ports across compose files" {
     local all_ports=""
-    for f in $(get_non_alternative_compose_files); do
+    for f in $(get_compose_files); do
         local ports
         ports=$(grep -E '^\s+-\s*"?[0-9]+:[0-9]+"?\s*$' "$f" 2>/dev/null | \
             sed -E 's/^[[:space:]]*-[[:space:]]*"?([0-9]+):.*/\1/')
@@ -33,9 +23,9 @@ get_non_alternative_compose_files() {
     fi
 }
 
-@test "no duplicate IPs across compose files (excluding alternative stacks)" {
+@test "no duplicate IPs across compose files" {
     local all_ips=""
-    for f in $(get_non_alternative_compose_files); do
+    for f in $(get_compose_files); do
         local ips
         ips=$(grep -oE 'ipv4_address:[[:space:]]*[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' "$f" 2>/dev/null | \
             sed -E 's/ipv4_address:[[:space:]]*//')

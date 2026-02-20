@@ -15,7 +15,7 @@
 | Service | Core (IP:port) | + local DNS | + remote access |
 |---------|----------------|-------------|-----------------|
 | Jellyfin | `NAS_IP:8096` | `http://jellyfin.lan` | `https://jellyfin.DOMAIN` |
-| Jellyseerr | `NAS_IP:5055` | `http://jellyseerr.lan` | `https://jellyseerr.DOMAIN` |
+| Seerr | `NAS_IP:5055` | `http://seerr.lan` | `https://seerr.DOMAIN` |
 | Sonarr | `NAS_IP:8989` | `http://sonarr.lan` | — |
 | Radarr | `NAS_IP:7878` | `http://radarr.lan` | — |
 | Prowlarr | `NAS_IP:9696` | `http://prowlarr.lan` | — |
@@ -45,7 +45,7 @@
 | ↳ Prowlarr | (via Gluetun) | 9696 | Indexer manager |
 | Jellyfin | 172.20.0.4 | 8096 | Media server |
 | Pi-hole | 172.20.0.5 | 8081 | DNS ad-blocking (`/admin`) |
-| Jellyseerr | 172.20.0.8 | 5055 | Request management |
+| Seerr | 172.20.0.8 | 5055 | Request management |
 | Bazarr | 172.20.0.9 | 6767 | Subtitles |
 | FlareSolverr | 172.20.0.10 | 8191 | Cloudflare bypass |
 
@@ -81,15 +81,15 @@
 | Prowlarr | Sonarr | `localhost:8989` | Same network stack |
 | Prowlarr | Radarr | `localhost:7878` | Same network stack |
 | Prowlarr | FlareSolverr | `http://172.20.0.10:8191` | Direct IP (outside gluetun) |
-| Jellyseerr | Sonarr | `gluetun:8989` | Must go through gluetun |
-| Jellyseerr | Radarr | `gluetun:7878` | Must go through gluetun |
-| Jellyseerr | Jellyfin | `jellyfin:8096` | Both have own IPs |
+| Seerr | Sonarr | `gluetun:8989` | Must go through gluetun |
+| Seerr | Radarr | `gluetun:7878` | Must go through gluetun |
+| Seerr | Jellyfin | `jellyfin:8096` | Both have own IPs |
 | Bazarr | Sonarr | `gluetun:8989` | Must go through gluetun |
 | Bazarr | Radarr | `gluetun:7878` | Must go through gluetun |
 | Sonarr | SABnzbd | `localhost:8080` | Same network stack |
 | Radarr | SABnzbd | `localhost:8080` | Same network stack |
 
-> **Why `gluetun` not `sonarr`?** Services sharing gluetun's network don't get their own Docker DNS entries. Jellyseerr/Bazarr must use `gluetun` hostname (or `172.20.0.3`) to reach them.
+> **Why `gluetun` not `sonarr`?** Services sharing gluetun's network don't get their own Docker DNS entries. Seerr/Bazarr must use `gluetun` hostname (or `172.20.0.3`) to reach them.
 
 ## Common Commands
 
@@ -134,7 +134,7 @@ Services start in dependency order (handled automatically by `depends_on`):
 1. **Pi-hole** → DNS ready (for containers; optionally your LAN)
 2. **Gluetun** → VPN connected (uses Pi-hole for internal DNS)
 3. **Sonarr, Radarr, Prowlarr, qBittorrent, SABnzbd** → VPN-protected services
-4. **Jellyseerr, Bazarr** → Connect to Sonarr/Radarr via Gluetun
+4. **Seerr, Bazarr** → Connect to Sonarr/Radarr via Gluetun
 5. **Jellyfin, WireGuard, FlareSolverr** → Independent, start anytime
 
 ## Compose Files
@@ -144,24 +144,7 @@ Services start in dependency order (handled automatically by `depends_on`):
 | Service | Description |
 |---------|-------------|
 | Jellyfin | Media streaming |
-| Jellyseerr | Request system |
-| Sonarr | TV management |
-| Radarr | Movie management |
-| Prowlarr | Indexer manager |
-| qBittorrent | Torrent client |
-| SABnzbd | Usenet client |
-| Bazarr | Subtitles |
-| Gluetun | VPN gateway |
-| Pi-hole | DNS/ad-blocking |
-| WireGuard | VPN server |
-| FlareSolverr | CAPTCHA bypass |
-
-### `docker-compose.plex-arr-stack.yml` (Core - Plex)
-
-| Service | Description |
-|---------|-------------|
-| Plex | Media streaming |
-| Overseerr | Request system |
+| Seerr | Request system |
 | Sonarr | TV management |
 | Radarr | Movie management |
 | Prowlarr | Indexer manager |

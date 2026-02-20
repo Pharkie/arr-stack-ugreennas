@@ -13,7 +13,7 @@ check_uptime_monitors() {
         "duc"
         "FlareSolverr"
         "Jellyfin"
-        "Jellyseerr"
+        "Seerr"
         "Pi-hole"
         "Prowlarr"
         "qBittorrent"

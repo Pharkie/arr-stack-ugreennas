@@ -14,9 +14,9 @@ Works on Ugreen, Synology, QNAP, or any Docker host.
 
 - **Production-ready** — Real healthchecks, auto-recovery when VPN reconnects, backup script. Not just "it runs."
 - **Battle-tested** — Edge cases found and fixed across multiple NAS setups. More resilient than most.
-- **Everything you need** — Jellyfin, Sonarr, Radarr, Prowlarr, Bazarr, Jellyseerr, qBittorrent, SABnzbd, Pi-hole, Cloudflare Tunnel. Modular — skip what you don't need, add what you do (e.g. Lidarr).
+- **Everything you need** — Jellyfin, Sonarr, Radarr, Prowlarr, Bazarr, Seerr, qBittorrent, SABnzbd, Pi-hole, Cloudflare Tunnel. Modular — skip what you don't need, add what you do (e.g. Lidarr).
 - **Step-by-step guide** — Not just a docker-compose file in a repo.
-- **Flexible** — Plex variant included. Supports 30+ VPN providers.
+- **Flexible** — Supports 30+ VPN providers. Plex users can swap Jellyfin (see [setup guide](docs/SETUP.md)).
 - **Privacy by default** — All downloads route through your VPN.
 
 <details>
@@ -35,7 +35,7 @@ Works on Ugreen, Synology, QNAP, or any Docker host.
 
 **The flow:** Someone requests a show → it downloads automatically → appears in your media library.
 
-Request: Jellyseerr → Sonarr/Radarr → Prowlarr
+Request: Seerr → Sonarr/Radarr → Prowlarr
 Download: qBittorrent (torrents) or SABnzbd (Usenet) — both via VPN (Gluetun)
 Watch: Jellyfin — locally or remotely via Traefik
 

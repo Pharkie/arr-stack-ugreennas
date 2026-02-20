@@ -15,7 +15,6 @@ traefik/*.json
 # Traefik Config Files (copy from .example and customize)
 traefik/traefik.yml
 traefik/dynamic/vpn-services.yml
-traefik/dynamic/vpn-services-plex.yml
 traefik/dynamic/*.local.yml
 
 # Pi-hole Local DNS (copy from .example and customize)

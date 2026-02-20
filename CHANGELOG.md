@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.4] - 2026-02-20
+
+### Changed
+- **Jellyseerr → Seerr**: Migrated from `fallenbagel/jellyseerr:2.7` to `ghcr.io/seerr-team/seerr:v3.0.1` (the official rebrand). Runs as non-root (UID 1000), requires `init: true`. Container name and volume remain `jellyseerr` / `jellyseerr-config` for backwards compatibility
+- **jellyseerr.lan → seerr.lan**: Primary domain renamed. Permanent 301 redirects from `jellyseerr.lan` and `jellyseer.lan` to `seerr.lan` (Traefik + external). Existing bookmarks continue to work
+- **FlareSolverr healthcheck**: Reduced `start_period` from 2m to 60s to exit `starting` state faster
+
+### Removed
+- **Plex compose file deleted**: `docker-compose.plex-arr-stack.yml` and `vpn-services-plex.yml.example` removed. Plex users should modify the Jellyfin compose directly — see "Prefer Plex?" section in SETUP.md
+- **Compose drift pre-commit check**: Removed (was comparing Jellyfin/Plex files for consistency — no longer needed)
+
+### Documentation
+- All docs updated: Jellyseerr → Seerr throughout (SETUP, REFERENCE, ARCHITECTURE, LEGAL, README, instructions)
+- Pi-hole DNS: clarified that `pihole reloaddns` does NOT pick up bind-mount file changes — must use `docker restart pihole`
+- CONTRIBUTING.md: updated scripts structure, pre-commit hooks table, project structure
+
+---
+
 ## [1.6.3] - 2026-02-18
 
 ### Fixed

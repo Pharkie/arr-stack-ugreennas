@@ -21,7 +21,7 @@ All software included in this stack is **legal, open-source, and has legitimate 
 | **Prowlarr** | Search aggregator supporting Usenet providers, public trackers, and indexers |
 | **qBittorrent** | BitTorrent client - torrenting is a legal distribution method used for Linux, Creative Commons content, academic datasets, game patches, and other legal media |
 | **Bazarr** | Subtitle management for accessibility |
-| **Jellyseerr** | Request management for household media libraries |
+| **Seerr** | Request management for household media libraries |
 | **Gluetun VPN** | Network privacy and security |
 | **Traefik** | Reverse proxy and SSL certificate management |
 | **Pi-hole** | DNS-level ad blocking and network security |

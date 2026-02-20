@@ -8,7 +8,7 @@ When someone requests a movie or TV show, here's what happens:
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌───────────┐     ┌─────────────┐     ┌──────────┐
-│ Jellyseerr  │────▶│ Sonarr/Radarr│────▶│ Prowlarr  │────▶│ qBittorrent │────▶│ Jellyfin │
+│   Seerr     │────▶│ Sonarr/Radarr│────▶│ Prowlarr  │────▶│ qBittorrent │────▶│ Jellyfin │
 │ (request)   │     │ (manage)     │     │ (indexers)│     │   SABnzbd   │     │ (watch)  │
 │             │     │              │     │           │     │ (download)  │     │          │
 └─────────────┘     └──────────────┘     └───────────┘     └─────────────┘     └──────────┘
@@ -18,7 +18,7 @@ When someone requests a movie or TV show, here's what happens:
                            Through VPN (Gluetun)                              Not through VPN
 ```
 
-1. **Jellyseerr** - User requests a show or movie
+1. **Seerr** - User requests a show or movie
 2. **Sonarr/Radarr** - Searches for releases, sends to download client
 3. **Prowlarr** - Provides indexers (torrent + Usenet) to Sonarr/Radarr
 4. **qBittorrent** - Downloads torrents (through VPN)
@@ -47,7 +47,7 @@ Internet ◄───VPN Tunnel───────│  qBittorrent  Sonarr  Ra
                                     ─ ─ ─ ─ ─ ─ ─│─ ─ ─ ─ ─ ─ ─
                                                  │
                               ┌──────────────────┴──────────────────────┐
-Internet ◄──Cloudflare Tunnel─│  Jellyfin    Jellyseerr                │
+Internet ◄──Cloudflare Tunnel─│  Jellyfin    Seerr                     │
   (remote)                    │  (stream)    (requests)                 │
                               │                                         │
 LAN only ◄────────────────────│  Pi-hole     Sonarr      Radarr   ...  │
@@ -64,7 +64,7 @@ Services inside Gluetun's network use `localhost` to talk to each other. Service
 ```
 Inside Gluetun (same network):       Outside Gluetun:
 ─────────────────────────────        ─────────────────
-Sonarr → qBittorrent                 Jellyseerr → Sonarr
+Sonarr → qBittorrent                 Seerr → Sonarr
   └── localhost:8085                   └── gluetun:8989
 
 Radarr → qBittorrent                 Bazarr → Radarr
@@ -85,7 +85,7 @@ arr-stack network (172.20.0.0/24)
 ├──────────────┼──────────────┼────────────────────────────────┼──────────────────│
 │ 172.20.0.3   │ Gluetun      │ VPN gateway + arr services     │ Core             │
 │ 172.20.0.4   │ Jellyfin     │ Media server                   │ Core             │
-│ 172.20.0.8   │ Jellyseerr   │ Request portal                 │ Core             │
+│ 172.20.0.8   │ Seerr        │ Request portal                 │ Core             │
 │ 172.20.0.9   │ Bazarr       │ Subtitles                      │ Core             │
 │ 172.20.0.10  │ FlareSolverr │ Cloudflare bypass              │ Core (optional)  │
 │ 172.20.0.5   │ Pi-hole      │ DNS server                     │ Core             │
@@ -106,7 +106,7 @@ arr-stack network (172.20.0.0/24)
 │                      Access via NAS_IP:port                              │
 │  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐            │
 │  │ :8096     │  │ :8989     │  │ :7878     │  │ :5055     │  ...       │
-│  │ Jellyfin  │  │ Sonarr    │  │ Radarr    │  │Jellyseerr │            │
+│  │ Jellyfin  │  │ Sonarr    │  │ Radarr    │  │   Seerr   │            │
 │  └───────────┘  └───────────┘  └───────────┘  └───────────┘            │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
@@ -128,7 +128,7 @@ arr-stack network (172.20.0.0/24)
 │                        + REMOTE ACCESS                                   │
 │                   Access from outside your home                          │
 │  ┌─────────────────────┐  ┌─────────────────────┐                       │
-│  │ jellyfin.domain.com │  │ jellyseerr.domain.com│  ...                 │
+│  │ jellyfin.domain.com │  │ seerr.domain.com     │  ...                 │
 │  └─────────────────────┘  └─────────────────────┘                       │
 │                                                                          │
 │  Phone → Cloudflare → Tunnel → Traefik → Service                        │

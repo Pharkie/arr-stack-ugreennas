@@ -11,7 +11,6 @@ arr-stack-ugreennas/
 ├── docker-compose.traefik.yml      # Traefik reverse proxy
 ├── docker-compose.arr-stack.yml    # Main media stack (Jellyfin)
 ├── docker-compose.utilities.yml    # Optional utilities (monitoring, disk usage)
-├── docker-compose.plex-arr-stack.yml  # Plex variant (untested)
 ├── docker-compose.cloudflared.yml  # Cloudflare tunnel
 ├── traefik/                        # Traefik configuration
 │   ├── traefik.yml.example         # Static config template (copy & customize)
@@ -19,7 +18,6 @@ arr-stack-ugreennas/
 │   └── dynamic/
 │       ├── tls.yml                 # TLS settings (generic, no customization needed)
 │       ├── vpn-services.yml.example    # Jellyfin routing template
-│       ├── vpn-services-plex.yml.example  # Plex routing template
 │       ├── vpn-services.yml        # Your routing config (gitignored)
 │       └── utilities.yml           # Utilities routing (generic)
 ├── .env.example                    # Environment template
@@ -51,7 +49,7 @@ Internet → Cloudflare Tunnel (or Router Port Forward 80→8080, 443→8443)
                             ▼
            Traefik (listening on 8080/8443 on NAS)
                             │
-                            ├─► Jellyfin, Jellyseerr, Bazarr (Direct)
+                            ├─► Jellyfin, Seerr, Bazarr (Direct)
                             │
                             └─► Gluetun (VPN Gateway)
                                     │
@@ -137,7 +135,6 @@ This repo includes validation hooks that run on `git commit`:
 | Env vars | Yes | Ensures compose `${VAR}` are documented in `.env.example` |
 | YAML syntax | Yes | Catches invalid YAML before it breaks deployment |
 | Port/IP conflicts | Yes | Detects duplicate ports or static IPs |
-| Compose drift | Warn | Flags Jellyfin/Plex inconsistencies |
 | Hardcoded domain | Block | Detects your hostname in tracked files (leaks identity) |
 | Hardcoded domain | Warn | Detects your domain in tracked files (may be intentional) |
 | NAS .env backup | Warn | Checks `.env.nas.backup` matches NAS |
@@ -252,10 +249,12 @@ scripts/
     ├── check-env-vars.sh       # Ensure compose vars are documented
     ├── check-yaml-syntax.sh    # Validate YAML syntax
     ├── check-conflicts.sh      # Detect port/IP conflicts
-    ├── check-compose-drift.sh  # Compare Jellyfin/Plex variants
     ├── check-hardcoded-domain.sh  # Detect domain/hostname in tracked files
     ├── check-env-backup.sh     # Compare .env.nas.backup with NAS
-    └── check-uptime-monitors.sh   # Verify Uptime Kuma monitors
+    ├── check-uptime-monitors.sh   # Verify Uptime Kuma monitors
+    ├── check-dns-duplicates.sh # Detect duplicate .lan domains
+    ├── check-domains.sh        # Verify domain accessibility
+    └── check-image-versions.sh # Check for stale Docker image tags
 ```
 
 The `common.sh` library provides shared functions used by all checks:

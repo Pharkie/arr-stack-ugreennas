@@ -31,7 +31,7 @@ Copy this file to `config.local.md` and fill in your values.
 | Jellyfin | 172.20.0.4 |
 | Pi-hole | 172.20.0.5 |
 | WireGuard | 172.20.0.6 |
-| Jellyseerr | 172.20.0.8 |
+| Seerr | 172.20.0.8 |
 | Bazarr | 172.20.0.9 |
 | FlareSolverr | 172.20.0.10 |
 | Cloudflared | 172.20.0.12 |
@@ -46,7 +46,7 @@ Replace `yourdomain.com` with your actual domain:
 |---------|-----|
 | Traefik Dashboard | https://traefik.yourdomain.com |
 | Jellyfin | https://jellyfin.yourdomain.com |
-| Jellyseerr | https://jellyseerr.yourdomain.com |
+| Seerr | https://seerr.yourdomain.com |
 | Sonarr | https://sonarr.yourdomain.com |
 | Radarr | https://radarr.yourdomain.com |
 | Prowlarr | https://prowlarr.yourdomain.com |

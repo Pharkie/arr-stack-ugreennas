@@ -47,7 +47,6 @@ check_conflicts() {
 
     # ── Cross-file duplicate detection ──────────────────────────────
     # Collect ALL ports and IPs across every compose file and flag duplicates
-    # Skip plex-arr-stack (alternative to arr-stack, intentionally shares ports/IPs)
     local all_ports_with_files=""
     local all_ips_with_files=""
 
@@ -55,8 +54,6 @@ check_conflicts() {
         [[ -f "$compose_file" ]] || continue
         local fname
         fname=$(basename "$compose_file")
-        # Skip alternative stack variants (they intentionally mirror the primary stack)
-        [[ "$fname" == "docker-compose.plex-arr-stack.yml" ]] && continue
 
         # Collect ports with their source file
         local file_ports
