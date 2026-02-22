@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.5] - 2026-02-22
+
+### Fixed
+- **FlareSolverr Cloudflare bypass fails** (fixes #5): FlareSolverr was running outside the VPN, so it solved Cloudflare challenges from a different IP than Prowlarr's VPN exit IP — Cloudflare rejected the mismatched cookies. FlareSolverr now runs behind Gluetun (`network_mode: "service:gluetun"`), sharing the same tunnel and IP as Prowlarr. This also fixes ISP DNS blocking of torrent domains, since FlareSolverr inherits Gluetun's Pi-hole DNS automatically
+
+### Changed
+- Prowlarr FlareSolverr host: `http://172.20.0.10:8191` → `http://localhost:8191` (same network namespace)
+- Uptime Kuma FlareSolverr monitor: `http://172.20.0.10:8191` → `http://172.20.0.3:8191` (via Gluetun)
+- Removed `flaresolverr.lan` DNS entry (no longer has its own IP)
+- Removed FlareSolverr static IP `172.20.0.10` from network tables (docs, config templates)
+
+---
+
 ## [1.6.4] - 2026-02-20
 
 ### Changed
