@@ -31,7 +31,11 @@ action:
           {{ trigger.json.eventType }}
         {% endif %}
       message: >
-        {% if trigger.json.episodes %}
+        {% if trigger.json.eventType == "Health" %}
+          {{ trigger.json.message }}
+        {% elif trigger.json.eventType == "ManualInteractionRequired" %}
+          Queue item needs manual import
+        {% elif trigger.json.episodes %}
           S{{ trigger.json.episodes[0].seasonNumber }}E{{ trigger.json.episodes[0].episodeNumber }} - {{ trigger.json.episodes[0].title }}
         {% elif trigger.json.movie %}
           ({{ trigger.json.movie.year }}) - {{ trigger.json.eventType }}
@@ -46,9 +50,11 @@ Change `notify.persistent_notification` to `notify.mobile_app_your_phone` for pu
 
 **Sonarr:** Settings → Connect → Add → Webhook
 - URL: `http://homeassistant.lan:8123/api/webhook/arr-notifications`
-- Events: On Grab, On Download, On Upgrade
+- Events: On Import Complete, On Upgrade, On Health Issue, On Manual Interaction Required
 
 **Radarr:** Same URL and events.
+
+> **Skip "On Grab" and "On Movie Added"** — these fire when Sonarr/Radarr find a release or add a title to the wanted list, not when files are actually ready. They're noisy and not actionable.
 
 Click **Test** to verify.
 
