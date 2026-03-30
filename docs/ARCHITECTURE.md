@@ -145,11 +145,14 @@ Two YAML anchors define security profiles in each compose file:
 
 | Anchor | Used by | Capabilities |
 |--------|---------|-------------|
-| `x-security` | Jellyfin, Seerr, FlareSolverr, Cloudflared, Traefik, utilities | None (fully locked down) |
+| `x-security` | All non-LSIO services | None by default (services add back only what they need) |
 | `x-security-lsio` | Sonarr, Radarr, Prowlarr, qBittorrent, SABnzbd, Bazarr | `CHOWN`, `SETUID`, `SETGID`, `DAC_OVERRIDE` (s6-overlay needs these to switch users during init) |
 
-Two services have additional requirements:
+Services that write to Docker volumes as root add back `CHOWN` + `DAC_OVERRIDE` (Jellyfin, Seerr, Uptime Kuma, DUC, Beszel, DIUN, Configarr). Services with read-only or no volumes don't need any (FlareSolverr, Cloudflared, Traefik, Deunhealth, Beszel-agent).
+
+Additional requirements:
 - **Gluetun** — adds `NET_ADMIN` (required to create VPN tunnel interfaces)
+- **Uptime Kuma** — adds `FOWNER` (sets ownership on created files)
 - **Pi-hole** — adds `NET_ADMIN`, `NET_RAW`, `CHOWN`, `SETUID`, `SETGID`, `SETFCAP`, `SYS_NICE`, `DAC_OVERRIDE`, and disables `no-new-privileges` (FTL uses `setcap` at startup)
 
 ## Design Decisions
