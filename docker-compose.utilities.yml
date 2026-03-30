@@ -78,6 +78,8 @@ services:
       - CHOWN           # Create subdirs in data volume on first run
       - DAC_OVERRIDE    # Write to root-owned volume directories
       - FOWNER          # Set ownership on created files
+    dns:
+      - 172.20.0.5  # Pi-hole, so .lan domains resolve (e.g. homeassistant.lan notifications)
     restart: always
     ports:
       - "3001:3001"  # Local network access only
