@@ -14,7 +14,7 @@ set -euo pipefail
 #   ./scripts/queue-cleanup.sh --apply -v     # remove with verbose output
 #
 # Cron (Thursday 2am):
-#   0 2 * * 4 /volume1/docker/arr-stack/scripts/queue-cleanup.sh --apply >> /var/log/queue-cleanup.log 2>&1
+#   0 2 * * 4 /volume1/docker/arr-stack/scripts/queue-cleanup.sh --apply >> /volume1/docker/arr-stack/logs/queue-cleanup.log 2>&1
 #
 # Prerequisites:
 #   - Sonarr and Radarr running and accessible on localhost
@@ -40,7 +40,7 @@ set -euo pipefail
 #     so you can inspect what it would do first.
 #
 
-LOG_FILE="/var/log/queue-cleanup.log"
+LOG_FILE="/volume1/docker/arr-stack/logs/queue-cleanup.log"
 MAX_LOG_LINES=1000
 
 # --- Parse arguments ---
@@ -182,6 +182,24 @@ def is_stuck(record):
     # Stuck imports (completed download but can't import)
     if tracked_state == "importing" and tracked_status == "warning":
         return "import_stuck", "completed but stuck importing"
+
+    # Import blocked (already imported, not an upgrade, etc.)
+    if tracked_state == "importBlocked":
+        msgs = []
+        for sm in record.get("statusMessages", []):
+            msgs.extend(sm.get("messages", []))
+        reason = "; ".join(msgs[:2]) if msgs else "import blocked"
+        return "import_blocked", reason
+
+    # Import pending with warnings (e.g. executable files, not an upgrade)
+    if tracked_state == "importPending" and tracked_status == "warning":
+        msgs = []
+        for sm in record.get("statusMessages", []):
+            msgs.extend(sm.get("messages", []))
+        all_msgs = " ".join(msgs).lower()
+        if "executable" in all_msgs or "not an upgrade" in all_msgs:
+            reason = "; ".join(msgs[:2]) if msgs else "import pending with warnings"
+            return "import_warning", reason
 
     # Stuck downloading metadata (no peers at all)
     if "downloading metadata" in error_msg:
