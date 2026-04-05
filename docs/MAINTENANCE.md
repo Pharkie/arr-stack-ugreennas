@@ -130,7 +130,7 @@ Add to NAS crontab (`crontab -e`):
 
 ```bash
 # Thursday 2am — clean stuck downloads weekly
-0 2 * * 4 /volume1/docker/arr-stack/scripts/queue-cleanup.sh --apply >> /var/log/queue-cleanup.log 2>&1
+0 2 * * 4 /volume1/docker/arr-stack/scripts/queue-cleanup.sh --apply >> /volume1/docker/arr-stack/logs/queue-cleanup.log 2>&1
 ```
 
 ### What gets removed
@@ -138,6 +138,8 @@ Add to NAS crontab (`crontab -e`):
 - Downloads stalled with no connections (dead seeders)
 - Torrents stuck downloading metadata (no peers)
 - Failed imports (downloaded but can't import)
+- Blocked imports (already imported, not an upgrade, missing episodes in pack)
+- Import-pending items with warnings (executable files, quality not accepted)
 - Items at 0% progress for more than 24 hours
 
 Items with **any** download progress are never removed, even if slow.
