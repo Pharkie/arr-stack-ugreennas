@@ -21,6 +21,7 @@ volumes:
   jellyfin-cache:
   seerr-config:
   bazarr-config:
+  dnscrypt-config:
   pihole-etc-pihole:
   pihole-etc-dnsmasq:
 
@@ -320,14 +321,46 @@ services:
       retries: 2
       start_period: 30s
 
+# ═══════════════════════════════════════════════════════════════════════════
+  # DNSCRYPT-PROXY - DNS over HTTPS/DNSCrypt proxy. Encrypts DNS queries.
+  # No web UI. Used internally by Pi-hole at 172.20.0.6:5053
+  # Protocols: DoH (DNS over HTTPS), DNSCrypt, Anonymized DNS
+  # ═══════════════════════════════════════════════════════════════════════════
+  dnscrypt-proxy:
+    image: klutchell/dnscrypt-proxy:2.1.14
+    container_name: dnscrypt-proxy
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      arr-stack:
+        ipv4_address: 172.20.0.6
+    volumes:
+      - dnscrypt-config:/config
+    environment:
+      - TZ=${TZ}
+    restart: always
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/dnsprobe", "google.com", "127.0.0.1:5053"]
+      interval: 30s
+      timeout: 10s
+      retries: 2
+      start_period: 30s
+
   # ═══════════════════════════════════════════════════════════════════════════
   # PI-HOLE - DNS server. Enables .lan domains and blocks ads network-wide.
   # Access: pihole.lan/admin | NAS_IP:8081/admin
   # For: Home Pro + Anywhere setups
+  # Configure upstream DNS: Settings → DNS → Custom = 172.20.0.6#5053
   # ═══════════════════════════════════════════════════════════════════════════
   pihole:
     image: pihole/pihole:2026.02.0
     container_name: pihole
+    depends_on:
+      dnscrypt-proxy:
+        condition: service_healthy
     ports:
       - "${NAS_IP}:53:53/tcp"  # Bind to NAS IP (not 0.0.0.0) to avoid conflict with host dnsmasq on 127.0.0.1:53
       - "${NAS_IP}:53:53/udp"  # NAS_IP MUST be a static IP — DHCP IPs aren't ready at boot, causing exit 128

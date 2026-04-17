@@ -2,7 +2,7 @@
 #
 # Automated app configuration for arr-stack
 #
-# Configures qBittorrent, Sonarr, Radarr, Prowlarr, and Bazarr via their APIs.
+# Configures qBittorrent, Sonarr, Radarr, Prowlarr, Bazarr, and Pi-hole via their APIs.
 # Replaces ~30 manual web UI steps with a single command.
 #
 # Usage:
@@ -27,7 +27,6 @@
 #   - Prowlarr: add indexers (user-specific credentials)
 #   - Seerr: initial Jellyfin login + service connections
 #   - SABnzbd: usenet provider credentials + folder config
-#   - Pi-hole: upstream DNS
 
 # ============================================
 # Source helpers
@@ -484,6 +483,36 @@ sys.exit(0 if 'remove_tags' in mods and 'OCR_fixes' in mods else 1)"; then
 }
 
 # ============================================
+# 5. Pi-hole
+# ============================================
+
+configure_pihole() {
+    log "Configuring Pi-hole..."
+
+    if $DRY_RUN; then
+        dry "Set Pi-hole upstream DNS to dnscrypt-proxy (172.20.0.6#5053)"
+        return
+    fi
+
+    # Check current upstream DNS configuration
+    local current_dns
+    current_dns=$(docker exec pihole pihole-FTL --config dns.upstreams 2>/dev/null || true)
+
+    if [[ "$current_dns" == *"172.20.0.6#5053"* ]]; then
+        skip "Pi-hole: upstream DNS (already using dnscrypt-proxy)"
+    else
+        # Set dnscrypt-proxy as upstream DNS using FTL config
+        if docker exec pihole pihole-FTL --config dns.upstreams '["172.20.0.6#5053"]' >/dev/null 2>&1; then
+            ok "Pi-hole: set upstream DNS to dnscrypt-proxy (172.20.0.6#5053)"
+            # Restart container to apply — pihole restartdns fails with cap_drop: ALL
+            docker restart pihole >/dev/null 2>&1
+        else
+            fail "Pi-hole: set upstream DNS"
+        fi
+    fi
+}
+
+# ============================================
 # Run all
 # ============================================
 
@@ -498,6 +527,8 @@ echo ""
 configure_prowlarr
 echo ""
 configure_bazarr
+echo ""
+configure_pihole
 
 # ============================================
 # Summary
@@ -521,9 +552,6 @@ echo "  3. Prowlarr: add indexers (torrent/Usenet)"
 echo "  4. Seerr: initial setup + Jellyfin login"
 if $SABNZBD_RUNNING; then
     echo "  5. SABnzbd: usenet provider credentials"
-    echo "  6. Pi-hole: upstream DNS"
-else
-    echo "  5. Pi-hole: upstream DNS"
 fi
 
 # Cleanup
