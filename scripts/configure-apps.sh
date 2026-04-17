@@ -496,16 +496,16 @@ configure_pihole() {
 
     # Check current upstream DNS configuration
     local current_dns
-    current_dns=$(docker exec pihole pihole-FTL --config dns.upstreams -q 2>/dev/null || true)
-    
+    current_dns=$(docker exec pihole pihole-FTL --config dns.upstreams 2>/dev/null || true)
+
     if [[ "$current_dns" == *"172.20.0.6#5053"* ]]; then
         skip "Pi-hole: upstream DNS (already using dnscrypt-proxy)"
     else
         # Set dnscrypt-proxy as upstream DNS using FTL config
         if docker exec pihole pihole-FTL --config dns.upstreams '["172.20.0.6#5053"]' >/dev/null 2>&1; then
             ok "Pi-hole: set upstream DNS to dnscrypt-proxy (172.20.0.6#5053)"
-            # Restart DNS service to apply changes
-            docker exec pihole pihole restartdns >/dev/null 2>&1
+            # Restart container to apply — pihole restartdns fails with cap_drop: ALL
+            docker restart pihole >/dev/null 2>&1
         else
             fail "Pi-hole: set upstream DNS"
         fi
