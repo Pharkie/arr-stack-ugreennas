@@ -38,6 +38,39 @@ docker compose -f docker-compose.arr-stack.yml up -d  # Restarts containers with
 
 When upgrading across versions, check below for any action required.
 
+### v1.7.8 → v1.7.9
+
+Fixes Pi-hole startup failure on multi-volume NAS setups (#16) and adds `NAS_STACK_DIR` env var.
+
+#### 1. Pull and redeploy
+
+```bash
+cd $NAS_STACK_DIR
+git pull origin main
+docker compose -f docker-compose.arr-stack.yml up -d --force-recreate
+```
+
+#### 2. Migrate Pi-hole DNS config
+
+```bash
+# Move your DNS config into the new dnsmasq.d directory
+mkdir -p pihole/dnsmasq.d
+mv pihole/02-local-dns.conf pihole/dnsmasq.d/02-local-dns.conf
+```
+
+#### 3. Add NAS_STACK_DIR to .env
+
+```bash
+# Add your stack path (adjust volume number if needed)
+echo 'NAS_STACK_DIR=/volume1/docker/arr-stack' >> .env
+```
+
+#### 4. Clean up orphaned volume
+
+```bash
+docker volume rm arr-stack_pihole-etc-dnsmasq 2>/dev/null || true
+```
+
 ### Container Security Hardening
 
 All containers now run with hardened Linux defaults:
