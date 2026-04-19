@@ -11,7 +11,7 @@ SSH into your NAS and pull the latest changes:
 
 ```bash
 ssh your-username@nas-ip
-cd /volume1/docker/arr-stack  # or your deployment path
+cd $NAS_STACK_DIR  # or your deployment path
 
 git pull origin main
 docker compose -f docker-compose.arr-stack.yml up -d --force-recreate  # Updates AND restarts - no further steps needed
@@ -53,7 +53,7 @@ Fixes `.lan` DNS resolution inside VPN-tunneled containers, adds a script to fix
 #### 1. Pull and redeploy
 
 ```bash
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 git pull origin main
 docker compose -f docker-compose.arr-stack.yml up -d --force-recreate
 ```
@@ -64,7 +64,7 @@ If you use `.lan` domains (local DNS setup), add the IPv6 wildcard to prevent DN
 
 ```bash
 # Check if already present
-grep 'address=/lan/::' pihole/02-local-dns.conf || echo 'address=/lan/::' >> pihole/02-local-dns.conf
+grep 'address=/lan/::' pihole/dnsmasq.d/02-local-dns.conf || echo 'address=/lan/::' >> pihole/dnsmasq.d/02-local-dns.conf
 docker restart pihole
 ```
 
@@ -110,7 +110,7 @@ Container rename: `jellyseerr` → `seerr` (completes the Seerr rebrand from v1.
 #### 1. Pull and redeploy
 
 ```bash
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 git pull origin main
 ```
 
@@ -147,7 +147,7 @@ Infrastructure cleanup and backup consolidation.
 #### 1. Pull and redeploy
 
 ```bash
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 git pull origin main
 docker compose -f docker-compose.arr-stack.yml up -d --force-recreate
 docker compose -f docker-compose.traefik.yml up -d --force-recreate
@@ -189,7 +189,7 @@ sudo chown -R 1000:1000 /volume1/data/media /volume1/data/torrents /volume1/data
 #### 2. Pull and redeploy
 
 ```bash
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 git pull origin main
 docker compose -f docker-compose.arr-stack.yml up -d --force-recreate
 ```
@@ -346,7 +346,7 @@ rm -f traefik/acme.json
 The old name was confusing - implied Traefik was required for Core setup. The network is used by all services.
 
 ```bash
-cd /volume1/docker/arr-stack && \
+cd $NAS_STACK_DIR && \
 git pull origin main && \
 docker compose -f docker-compose.arr-stack.yml down && \
 docker compose -f docker-compose.utilities.yml down 2>/dev/null; \
@@ -372,7 +372,7 @@ echo "Migration complete"
 Run the full migration as a single chained command to minimize DNS downtime:
 
 ```bash
-cd /volume1/docker/arr-stack && \
+cd $NAS_STACK_DIR && \
 git pull origin main && \
 docker compose -f docker-compose.arr-stack.yml down && \
 docker compose -f docker-compose.utilities.yml down 2>/dev/null; \

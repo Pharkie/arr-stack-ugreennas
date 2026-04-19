@@ -3,7 +3,7 @@
 # Traefik routes by Host header to correct service
 #
 # Usage (on NAS):
-#   sed "s/TRAEFIK_LAN_IP/10.10.0.11/g" pihole/02-local-dns.conf.example > pihole/02-local-dns.conf
+#   sed "s/TRAEFIK_LAN_IP/10.10.0.11/g" pihole/dnsmasq.d/02-local-dns.conf.example > pihole/dnsmasq.d/02-local-dns.conf
 #   docker restart pihole
 #
 # Note: Replace 10.10.0.11 with your chosen TRAEFIK_LAN_IP

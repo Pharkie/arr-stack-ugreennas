@@ -15,7 +15,7 @@ Cloudflare Tunnel lets you access services from outside your home without openin
 **1. Login to Cloudflare (run on NAS via SSH):**
 
 ```bash
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 mkdir -p cloudflared && chmod 777 cloudflared
 docker run --rm -v ./cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared tunnel login
 ```

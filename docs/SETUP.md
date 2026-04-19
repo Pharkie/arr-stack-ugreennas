@@ -98,7 +98,7 @@ Decide how you'll access your media stack:
 
 **Files you DON'T edit:**
 - `docker-compose.*.yml` - Work as-is, configured via `.env`
-- `pihole/02-local-dns.conf` - Generated from example via sed command
+- `pihole/dnsmasq.d/02-local-dns.conf` - Generated from example via sed command
 - `traefik/dynamic/tls.yml` - Security defaults
 - `traefik/dynamic/local-services.yml` - Auto-generates from `.env`
 
@@ -157,7 +157,7 @@ Add this to `docker-compose.arr-stack.yml` (add `plex-config` to the `volumes:` 
 You'll also need to:
 - **Add `PLEX_CLAIM`** to your `.env` file (only needed on first run)
 - **Add a Traefik route** for `plex.lan` → port `32400`
-- **Add a Pi-hole DNS entry** for `plex.lan` in `pihole/02-local-dns.conf`
+- **Add a Pi-hole DNS entry** for `plex.lan` in `pihole/dnsmasq.d/02-local-dns.conf`
 - **Enable hardware transcoding** in Plex Settings → Transcoder → "Use hardware acceleration when available" (requires Plex Pass). Jellyfin and Plex can share the iGPU
 
 If you're **replacing** Jellyfin rather than running both, also remove the Jellyfin service, its volumes (`jellyfin-config`/`jellyfin-cache`), and rename its Traefik routes to Plex. If running **both**, add Plex as a media server in Seerr settings alongside Jellyfin.
@@ -202,7 +202,7 @@ sudo chown -R 1000:1000 /volume1/data/media /volume1/data/torrents /volume1/data
 # Clone the repo
 cd /volume1/docker
 sudo git clone https://github.com/Pharkie/ultimate-arr-stack.git arr-stack  # or your fork
-sudo chown -R 1000:1000 /volume1/docker/arr-stack
+sudo chown -R 1000:1000 $NAS_STACK_DIR
 ```
 
 **Note:** Use `sudo` for Docker commands on Ugreen NAS. Service configs are stored in Docker named volumes (auto-created on first run).
@@ -245,7 +245,7 @@ sudo chown -R 1000:1000 /volume1/data/media /volume1/data/torrents /volume1/data
 # Clone the repo
 cd /volume1/docker
 sudo git clone https://github.com/Pharkie/ultimate-arr-stack.git arr-stack  # or your fork
-sudo chown -R 1000:1000 /volume1/docker/arr-stack
+sudo chown -R 1000:1000 $NAS_STACK_DIR
 ```
 
 </details>
@@ -309,7 +309,7 @@ sudo chown -R 1000:1000 /srv/docker/arr-stack
 
 The stack needs your media path, timezone, VPN credentials, and a few passwords. Everything goes in one `.env` file.
 
-> **Note:** From this point forward, all commands run **on your NAS via SSH**. If you closed your terminal, reconnect with `ssh your-username@nas-ip` and `cd /volume1/docker/arr-stack` (or your clone location). **UGOS users:** SSH may time out—re-enable in Control Panel → Terminal if needed.
+> **Note:** From this point forward, all commands run **on your NAS via SSH**. If you closed your terminal, reconnect with `ssh your-username@nas-ip` and `cd $NAS_STACK_DIR` (or your clone location). **UGOS users:** SSH may time out—re-enable in Control Panel → Terminal if needed.
 
 ### 2.1 Copy the Main Configuration File
 
@@ -430,8 +430,8 @@ Time to launch your containers and verify everything connects properly.
 ### 3.1 Deploy
 
 ```bash
-# Create empty config file (+ local DNS users will overwrite this later)
-touch pihole/02-local-dns.conf
+# Create dnsmasq config directory (+ local DNS users will add DNS entries later)
+mkdir -p pihole/dnsmasq.d
 
 docker compose -f docker-compose.arr-stack.yml up -d
 ```
@@ -589,8 +589,8 @@ Other *arr apps you can add to your Core stack:
 
 5. **(+ local DNS)** Add `.lan` domain:
    ```bash
-   # Add to pihole/02-local-dns.conf
-   echo "address=/lidarr.lan/TRAEFIK_LAN_IP" >> pihole/02-local-dns.conf
+   # Add to pihole/dnsmasq.d/02-local-dns.conf
+   echo "address=/lidarr.lan/TRAEFIK_LAN_IP" >> pihole/dnsmasq.d/02-local-dns.conf
 
    # Add Traefik route to traefik/dynamic/local-services.yml
    # (router + service, see existing entries as template)

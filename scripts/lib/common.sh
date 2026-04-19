@@ -125,6 +125,23 @@ get_nas_ip() {
     fi
 }
 
+# Get NAS stack directory (e.g., "/volume1/docker/arr-stack")
+# Reads NAS_STACK_DIR from .env or .env.nas.backup
+get_nas_stack_dir() {
+    local repo_root env_file env_backup stack_dir=""
+    repo_root=$(get_repo_root)
+    env_file="$repo_root/.env"
+    env_backup="$repo_root/.env.nas.backup"
+
+    if [[ -f "$env_file" ]]; then
+        stack_dir=$(grep -E '^NAS_STACK_DIR=' "$env_file" 2>/dev/null | cut -d= -f2 | tr -d '"' | tr -d "'")
+    elif [[ -f "$env_backup" ]]; then
+        stack_dir=$(grep -E '^NAS_STACK_DIR=' "$env_backup" 2>/dev/null | cut -d= -f2 | tr -d '"' | tr -d "'")
+    fi
+
+    echo "${stack_dir:-/volume1/docker/arr-stack}"
+}
+
 # ============================================
 # Domain Configuration (from .env or .env.nas.backup)
 # ============================================

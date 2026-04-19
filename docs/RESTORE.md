@@ -46,7 +46,7 @@ ls arr-stack-backup-*/
 If restoring to a new system, deploy first so Docker creates the volumes:
 
 ```bash
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 cp .env.example .env
 # Edit .env with your settings
 docker compose -f docker-compose.arr-stack.yml up -d
@@ -71,7 +71,7 @@ done
 ### 6. Start Services
 
 ```bash
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 docker compose -f docker-compose.arr-stack.yml up -d
 ```
 
@@ -108,8 +108,8 @@ docker compose -f docker-compose.arr-stack.yml start seerr
 The backup includes your `.env` file (saved as `dot-env`):
 
 ```bash
-cp /tmp/arr-stack-backup-*/dot-env /volume1/docker/arr-stack/.env
-chmod 600 /volume1/docker/arr-stack/.env
+cp /tmp/arr-stack-backup-*/dot-env $NAS_STACK_DIR/.env
+chmod 600 $NAS_STACK_DIR/.env
 ```
 
 Compose files and Traefik config don't need restoring — they're in git. Just `git clone` the repo again.

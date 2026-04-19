@@ -40,7 +40,7 @@ The container uses a static IP with a fake MAC address (`TRAEFIK_LAN_MAC` in `.e
 > **Important:** You MUST create `traefik.yml` before deploying. If Docker can't find the file, it creates a directory instead, and Traefik fails to start.
 
 ```bash
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 
 # Create Traefik config from example
 cp traefik/traefik.yml.example traefik/traefik.yml
@@ -52,11 +52,9 @@ docker compose -f docker-compose.traefik.yml up -d
 **Step 4: Configure DNS**
 ```bash
 # Copy example and replace placeholder with your Traefik IP
-sed "s/TRAEFIK_LAN_IP/10.10.0.11/g" pihole/02-local-dns.conf.example > pihole/02-local-dns.conf
-chmod 644 pihole/02-local-dns.conf
-
-# Tell Pi-hole to load custom DNS configs from dnsmasq.d folder (one-time)
-docker exec pihole sed -i 's/etc_dnsmasq_d = false/etc_dnsmasq_d = true/' /etc/pihole/pihole.toml
+mkdir -p pihole/dnsmasq.d
+sed "s/TRAEFIK_LAN_IP/10.10.0.11/g" pihole/dnsmasq.d/02-local-dns.conf.example > pihole/dnsmasq.d/02-local-dns.conf
+chmod 644 pihole/dnsmasq.d/02-local-dns.conf
 
 # Restart Pi-hole to apply changes
 docker compose -f docker-compose.arr-stack.yml restart pihole

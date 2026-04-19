@@ -12,7 +12,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STACK_DIR="$(dirname "$SCRIPT_DIR")"
 
-DNSMASQ_CONF="$STACK_DIR/pihole/02-local-dns.conf"
+DNSMASQ_CONF="$STACK_DIR/pihole/dnsmasq.d/02-local-dns.conf"
 get_pihole_toml() {
     docker exec pihole cat /etc/pihole/pihole.toml 2>/dev/null
 }

@@ -45,9 +45,13 @@ notify_failure() {
 STEP="initialising"
 trap 'notify_failure "Failed during: ${STEP}. Check /var/log/arr-backup.log"' ERR
 
+# Derive stack directory from script location (scripts/ is one level below stack root)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NAS_STACK_DIR="$(dirname "$SCRIPT_DIR")"
+
 # Ensure critical services are running on ANY exit (normal, error, or interrupt)
 ensure_services_running() {
-  COMPOSE_FILE="/volume1/docker/arr-stack/docker-compose.arr-stack.yml"
+  COMPOSE_FILE="$NAS_STACK_DIR/docker-compose.arr-stack.yml"
   [ -f "$COMPOSE_FILE" ] || return 0
 
   CRITICAL="gluetun pihole sonarr radarr prowlarr qbittorrent jellyfin sabnzbd"
@@ -195,7 +199,6 @@ VOLUME_SUFFIXES=(
   prowlarr-config         # Indexer configs and API keys
   bazarr-config           # Subtitle provider credentials
   uptime-kuma-data        # Monitor configurations
-  pihole-etc-dnsmasq      # Custom DNS settings (small)
 )
 
 # Request manager - detect which volume exists

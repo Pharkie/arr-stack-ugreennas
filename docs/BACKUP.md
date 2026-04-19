@@ -27,7 +27,6 @@ The backup script (`scripts/arr-backup.sh`) backs up **essential configs only** 
 | prowlarr-config | ~22MB | Indexer configs, API keys |
 | bazarr-config | ~2MB | Subtitle provider credentials |
 | uptime-kuma-data | ~14MB | Monitor configurations |
-| pihole-etc-dnsmasq | ~4KB | Custom DNS settings |
 | seerr-config | ~5MB | User accounts, requests |
 
 **Total: ~60MB uncompressed, ~13MB compressed**
@@ -55,7 +54,7 @@ Large volumes that regenerate automatically are excluded:
 
 ```bash
 # SSH into your NAS first, then:
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 ./scripts/arr-backup.sh --tar
 ```
 
@@ -175,7 +174,7 @@ A cron job runs daily at 6am, backing up to USB:
 sudo crontab -l
 
 # Default schedule (already configured):
-0 6 * * * /volume1/docker/arr-stack/scripts/arr-backup.sh --tar /mnt/arr-backup >> /var/log/arr-backup.log 2>&1
+0 6 * * * $NAS_STACK_DIR/scripts/arr-backup.sh --tar /mnt/arr-backup >> /var/log/arr-backup.log 2>&1
 ```
 
 **Features:**

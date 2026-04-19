@@ -88,7 +88,7 @@ The `check-vpn.sh` script compares Gluetun's exit IP against your NAS LAN IP and
 
 ```bash
 # Check every 5 minutes, log failures
-*/5 * * * * /volume1/docker/arr-stack/scripts/check-vpn.sh >> /var/log/vpn-check.log 2>&1
+*/5 * * * * $NAS_STACK_DIR/scripts/check-vpn.sh >> /var/log/vpn-check.log 2>&1
 ```
 
 ---
@@ -130,7 +130,7 @@ Add to NAS crontab (`crontab -e`):
 
 ```bash
 # Thursday 2am — clean stuck downloads weekly
-0 2 * * 4 /volume1/docker/arr-stack/scripts/queue-cleanup.sh --apply >> /volume1/docker/arr-stack/logs/queue-cleanup.log 2>&1
+0 2 * * 4 $NAS_STACK_DIR/scripts/queue-cleanup.sh --apply >> $NAS_STACK_DIR/logs/queue-cleanup.log 2>&1
 ```
 
 ### What gets removed

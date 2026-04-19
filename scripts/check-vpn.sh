@@ -11,7 +11,7 @@ set -euo pipefail
 #   1 = VPN leak detected (IPs match) or check failed
 #
 # Use in cron or monitoring to catch VPN failures:
-#   */5 * * * * /volume1/docker/arr-stack/scripts/check-vpn.sh || notify "VPN leak!"
+#   */5 * * * * /path/to/arr-stack/scripts/check-vpn.sh || notify "VPN leak!"
 
 # Detect NAS LAN IP
 NAS_IP=$(hostname -I 2>/dev/null | awk '{print $1}')

@@ -20,7 +20,7 @@ traefik/dynamic/vpn-services.yml
 traefik/dynamic/*.local.yml
 
 # Pi-hole Local DNS (copy from .example and customize)
-pihole/02-local-dns.conf
+pihole/dnsmasq.d/02-local-dns.conf
 
 # Cloudflared Credentials (locally-managed tunnel)
 cloudflared/config.yml

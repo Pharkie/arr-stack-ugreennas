@@ -26,7 +26,9 @@ check_dns_duplicates() {
 
     # Get domains from dnsmasq config
     local dnsmasq_domains
-    dnsmasq_domains=$(ssh_to_nas "grep -oP 'address=/\K[^/]+(?=\.lan/)' /volume1/docker/arr-stack/pihole/02-local-dns.conf 2>/dev/null | sort -u") || true
+    local stack_dir
+    stack_dir=$(get_nas_stack_dir)
+    dnsmasq_domains=$(ssh_to_nas "grep -oP 'address=/\K[^/]+(?=\.lan/)' $stack_dir/pihole/dnsmasq.d/02-local-dns.conf 2>/dev/null | sort -u") || true
 
     if [[ -z "$dnsmasq_domains" ]]; then
         echo "    SKIP: Could not read dnsmasq config"

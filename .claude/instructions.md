@@ -80,7 +80,7 @@ Forbidden in tracked files: API keys, passwords, tokens, private keys, public IP
 | Location | Purpose |
 |----------|---------|
 | Git repo (local) | Development |
-| Git repo (NAS: `/volume1/docker/arr-stack/`) | Deployment via `git pull` |
+| Git repo (NAS: `$NAS_STACK_DIR/`) | Deployment via `git pull` |
 
 **Deployed via git**: `docker-compose.*.yml`, `traefik/`, `scripts/`, `.claude/instructions.md`
 **Gitignored but required on NAS**: `.env` (manual setup), app data directories
@@ -95,11 +95,11 @@ Forbidden in tracked files: API keys, passwords, tokens, private keys, public IP
 git add -A && git commit -m "..." && git push
 
 # 2. Pull on NAS
-ssh <user>@<nas-host> "cd /volume1/docker/arr-stack && git pull"
+ssh <user>@<nas-host> "cd $NAS_STACK_DIR && git pull"
 
 # 3. Restart affected services
 ssh <user>@<nas-host> "docker restart traefik"  # For routing changes
-ssh <user>@<nas-host> "cd /volume1/docker/arr-stack && docker compose -f docker-compose.arr-stack.yml up -d"  # For compose changes
+ssh <user>@<nas-host> "cd $NAS_STACK_DIR && docker compose -f docker-compose.arr-stack.yml up -d"  # For compose changes
 ```
 
 ## NAS Access
@@ -203,7 +203,7 @@ If Pi-hole is down and you've lost DNS:
    ```
 3. **Start the stack**:
    ```bash
-   cd /volume1/docker/arr-stack && docker compose -f docker-compose.arr-stack.yml up -d
+   cd $NAS_STACK_DIR && docker compose -f docker-compose.arr-stack.yml up -d
    ```
 4. **Wait 30 seconds**, reconnect to home WiFi - DNS restored
 
@@ -213,7 +213,7 @@ If Pi-hole is down and you've lost DNS:
 
 **⚠️ CRITICAL: Don't duplicate .lan domains**
 
-Stack `.lan` domains are defined in `pihole/02-local-dns.conf` (dnsmasq config). User-specific domains can go in either:
+Stack `.lan` domains are defined in `pihole/dnsmasq.d/02-local-dns.conf` (dnsmasq config). User-specific domains can go in either:
 - `02-local-dns.conf` (CLI)
 - Pi-hole web UI (Local DNS → DNS Records) → writes to `pihole.toml`
 
@@ -222,7 +222,7 @@ Stack `.lan` domains are defined in `pihole/02-local-dns.conf` (dnsmasq config).
 **Adding stack .lan domains** (use dnsmasq):
 ```bash
 # On NAS - edit the config file
-nano /volume1/docker/arr-stack/pihole/02-local-dns.conf
+nano $NAS_STACK_DIR/pihole/dnsmasq.d/02-local-dns.conf
 
 # Add your entry
 address=/myservice.lan/10.10.0.XX
@@ -272,7 +272,7 @@ UGOS handles automatic updates natively (no Watchtower needed):
 
 Cron runs daily at 6am:
 ```
-0 6 * * * /volume1/docker/arr-stack/scripts/backup-volumes.sh --tar /mnt/arr-backup >> /var/log/arr-backup.log 2>&1
+0 6 * * * $NAS_STACK_DIR/scripts/backup-volumes.sh --tar /mnt/arr-backup >> /var/log/arr-backup.log 2>&1
 ```
 
 **How it works:**
@@ -289,7 +289,7 @@ Cron runs daily at 6am:
 
 ```bash
 # Run backup manually on NAS
-ssh <user>@<nas-host> "cd /volume1/docker/arr-stack && ./scripts/backup-volumes.sh --tar"
+ssh <user>@<nas-host> "cd $NAS_STACK_DIR && ./scripts/backup-volumes.sh --tar"
 
 # Pull from /tmp to local repo (gitignored backups/ folder)
 ssh <user>@<nas-host> "cat /tmp/arr-stack-backup-*.tar.gz" > backups/arr-stack-backup-$(date +%Y%m%d).tar.gz
@@ -356,7 +356,7 @@ This pattern is used in `scripts/lib/check-env-backup.sh` and `check-uptime-moni
 
 To add `.lan` domains for services outside this stack (e.g., Frigate, Home Assistant):
 
-**1. Add DNS entry** (gitignored `pihole/02-local-dns.conf`):
+**1. Add DNS entry** (gitignored `pihole/dnsmasq.d/02-local-dns.conf`):
 ```
 address=/frigate.lan/TRAEFIK_LAN_IP
 ```

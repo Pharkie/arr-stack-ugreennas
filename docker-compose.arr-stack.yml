@@ -23,7 +23,6 @@ volumes:
   bazarr-config:
   dnscrypt-config:
   pihole-etc-pihole:
-  pihole-etc-dnsmasq:
 
 #########################
 # Networks              #
@@ -372,10 +371,10 @@ services:
       - TZ=${TZ}
       - FTLCONF_webserver_api_password=${PIHOLE_UI_PASS}
       - FTLCONF_dns_listeningMode=all
+      - FTLCONF_misc_etc_dnsmasq_d=true
     volumes:
       - pihole-etc-pihole:/etc/pihole
-      - pihole-etc-dnsmasq:/etc/dnsmasq.d
-      - ./pihole/02-local-dns.conf:/etc/dnsmasq.d/02-local-dns.conf:ro
+      - ./pihole/dnsmasq.d:/etc/dnsmasq.d
     security_opt:
       - no-new-privileges:false  # Pi-hole FTL needs setcap to apply capabilities
     cap_drop:

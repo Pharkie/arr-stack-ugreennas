@@ -37,7 +37,7 @@ Legacy redirect routers/middleware in `traefik/dynamic/local-services.yml` and `
 
 ## Part 4: Pi-hole DNS — DONE (646de8d)
 
-`pihole/02-local-dns.conf.example` — The `jellyseerr.lan` entry STAYS (needed for the redirect to work). No changes.
+`pihole/dnsmasq.d/02-local-dns.conf.example` — The `jellyseerr.lan` entry STAYS (needed for the redirect to work). No changes.
 
 ## Part 5: Scripts — DONE (646de8d)
 
@@ -58,7 +58,7 @@ Legacy redirect routers/middleware in `traefik/dynamic/local-services.yml` and `
 - `CHANGELOG.md` — historical records, leave as-is
 - `traefik/dynamic/local-services.yml` — legacy redirect routers stay
 - `traefik/dynamic/vpn-services.yml.example` — legacy redirect routers stay
-- `pihole/02-local-dns.conf.example` — `jellyseerr.lan` DNS entry stays for redirect
+- `pihole/dnsmasq.d/02-local-dns.conf.example` — `jellyseerr.lan` DNS entry stays for redirect
 - `scripts/lib/check-domains.sh` — `jellyseerr.lan` stays in check list
 - `.claude/settings.local.json` — dev-only
 - `tests/e2e/stack.spec.ts` — no jellyseerr references (already uses "seerr")

@@ -39,7 +39,7 @@ Create admin account when prompted.
 
 ```bash
 # SSH to your NAS:
-cd /volume1/docker/arr-stack
+cd $NAS_STACK_DIR
 
 # If you've changed qBittorrent's default password:
 QBIT_PASSWORD='yourpassword' ./scripts/configure-apps.sh
