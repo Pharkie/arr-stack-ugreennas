@@ -2,6 +2,71 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.10] - 2026-04-21
+
+### Fixed
+- **SETUP.md clone block**: The Ugreen and Synology sections referenced `$NAS_STACK_DIR` in `chown` before `.env` existed, causing `chown: missing operand`. The variable is now set as a shell var at the top of the clone block, so volume2 users change one line and the whole block works. Reported by u/OatStraw on Reddit
+
+---
+
+## [1.7.9] - 2026-04-19
+
+### Fixed
+- **Pi-hole startup failure on multi-volume NAS setups** (#16): Introduced `NAS_STACK_DIR` env var so Pi-hole's config bind-mount resolves correctly when the stack lives on a non-default volume (e.g. `/volume2/docker/arr-stack`). Pi-hole's `dnsmasq.d` config moved under `pihole/dnsmasq.d/` — see UPGRADING.md for the migration command
+
+### Changed
+- **Pi-hole** 2026.02.0 → 2026.04.0
+
+### Documentation
+- **SETUP.md**: Added multi-volume NAS note explaining `NAS_STACK_DIR` vs `MEDIA_ROOT` split (stack on one volume, media library on another)
+- **README**: Clarified LLM attribution; mention Opus 4.7
+
+---
+
+## [1.7.8] - 2026-04-17
+
+### Added
+- **dnscrypt-proxy service** (#15, from @gncnpk): Encrypts DNS queries between Pi-hole and upstream resolvers. Runs internally on the arr-stack network with no host port exposure. Configure-apps.sh now sets up Pi-hole to use it
+
+### Changed
+- **Seerr** v3.1.0 → v3.2.0
+
+### Fixed
+- **Queue-cleanup cron silently failing**: Log path moved from `/var/log/` (which `mooseadmin` can't write to on UGOS) to `$NAS_STACK_DIR/logs/`. Also added detection for `importBlocked` and `importPending` items (already-imported packs, executable files, quality mismatches) that were accumulating unhandled
+- **Pi-hole config**: Removed unsupported `-q` flag from `pihole-FTL --config` and switched from `pihole restartdns` (which fails under `cap_drop: ALL`) to `docker restart pihole`
+
+### Security
+- **dnscrypt-proxy hardening**: Pinned image to 2.1.14 (from `:latest`), removed unnecessary `NET_ADMIN`/`NET_RAW` caps (port 5053 is unprivileged), set `no-new-privileges: true`
+
+### Documentation
+- **MAINTENANCE.md** and HA webhook: Updated queue-cleanup log path references
+
+---
+
+## [1.7.7] - 2026-03-31
+
+### Fixed
+- **`cap_drop: ALL` breaking non-LSIO services on fresh install**: v1.7.6 dropped all Linux capabilities by default, but several non-LSIO services (Pi-hole, etc.) need `CHOWN` + `DAC_OVERRIDE` to write to volume directories. Added them back via targeted `cap_add`. Existing installs were unaffected — this only bit fresh deploys
+
+### Added
+- **Pi-hole DNS in Uptime Kuma**: Uptime Kuma now uses Pi-hole as its DNS resolver so `.lan` monitor URLs resolve correctly
+
+### Documentation
+- **ARCHITECTURE.md**: Corrected security docs — x-security services aren't "fully locked down"; volume-writing services need `CHOWN` + `DAC_OVERRIDE`
+
+---
+
+## [1.7.6] - 2026-03-28
+
+### Security
+- **Container security hardening**: Every container across all four compose files now runs with `cap_drop: ALL` and `no-new-privileges: true`. LSIO images get `CHOWN`/`SETUID`/`SETGID`/`DAC_OVERRIDE` back for s6-overlay init. Gluetun keeps `NET_ADMIN` for VPN tunnels. Pi-hole gets targeted caps for the FTL binary. See [Container Security](docs/ARCHITECTURE.md#container-security)
+
+### Added
+- **Weekly queue cleanup script** (`scripts/queue-cleanup.sh`): Identifies stuck Sonarr/Radarr queue items (stalled torrents, metadata-stuck, failed imports, 0% for 24h+), removes them with blocklist, and triggers fresh searches. Dry-run by default; suggested cron: Thu 2am
+- **Renovate config**: Automated Docker image update PRs, grouped by category (LSIO, infrastructure, utilities), scheduled weekly Monday mornings. Auto-merges LSIO patch updates
+
+---
+
 ## [1.7.5] - 2026-03-18
 
 ### Changed
