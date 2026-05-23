@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.14] - 2026-05-23
+
+### Fixed
+- **`configure-apps.sh` hanging at "Configuring qBittorrent..."**: `wait_for_service` polled with `curl` and no `--max-time`, so a single hung connection (qBit accepting TCP but not responding during Gluetun init) silently extended the advertised 60s timeout into many minutes. Now bounded per-call, bounded wall-clock, with a 10s heartbeat showing the last HTTP code so users know it's working. Reported on Reddit
+- **Cloudflared `No file cert.pem` on tunnel create**: the `sudo chown -R 65532:65532 cloudflared/` step (required on UGOS/Synology where NAS ACLs override POSIX perms) was buried as a "troubleshooting note" after the `tunnel login` command. Most users hit this on first run before seeing the note. Promoted to a required pre-step. Dropped the `chmod 777` line — doesn't actually work under ACLs. Reported on Reddit
+
+### Added
+- **`configure-apps.sh` Gluetun pre-flight check**: bail fast with a clear message if Gluetun isn't `healthy`. qBittorrent and the *arr services share Gluetun's network namespace, so without it they can't respond — without this check, the user just sees a long hang
+- **TROUBLESHOOTING.md "Seerr: /app/config volume mount was not configured properly"**: documents the Seerr first-run startup check (stricter than Jellyseerr was), usually caused by a half-initialised `seerr-config` volume from an interrupted start. Fix is wipe + recreate. Reported on Reddit
+
+---
+
 ## [1.7.13] - 2026-05-02
 
 ### Changed
