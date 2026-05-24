@@ -155,6 +155,6 @@ From your phone on cellular data (not WiFi):
 - **[Backup](SETUP.md#backup)** — Protect your configs
 - **[Optional Utilities](UTILITIES.md)** — Monitoring, auto-recovery, disk usage
 
-> **Need full network access remotely?** Cloudflare Tunnel only exposes HTTP services (Jellyfin, Seerr). If you need to access admin UIs (Sonarr, Radarr, etc.) or `.lan` domains from outside your home, look into [Tailscale](https://tailscale.com/) — it's free for personal use and works even behind CGNAT. Setup is not covered here.
+> **Need full network access remotely?** Cloudflare Tunnel only exposes HTTP services (Jellyfin, Seerr). For admin UIs (Sonarr, Radarr, etc.) or `.lan` domains from anywhere — including CGNAT and hotel WiFi — add [Tailscale](TAILSCALE.md). Free for personal use, complementary to Cloudflared.
 
 Issues? [Report on GitHub](https://github.com/Pharkie/ultimate-arr-stack/issues) or [chat on Reddit](https://www.reddit.com/user/Jeff46K4/).

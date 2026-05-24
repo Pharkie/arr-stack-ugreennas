@@ -1,0 +1,69 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# TAILSCALE - Remote access to your full LAN via mesh VPN
+#
+# What it does:
+# - Acts as a subnet router: advertises your LAN (e.g. 10.10.0.0/24) to your
+#   Tailscale tailnet so phones/laptops can reach Pi-hole, *.lan domains,
+#   Home Assistant, NAS admin UIs, etc. from anywhere.
+# - Traverses CGNAT (no port-forward needed) and falls back to a relay over
+#   :443 if direct UDP fails — works on hotel WiFi, mobile, anywhere.
+#
+# When to use this (vs Cloudflare Tunnel):
+# - Cloudflared exposes specific HTTP services to the public internet.
+# - Tailscale gives YOU (and authorised devices) private access to the whole
+#   LAN — including non-HTTP services and admin UIs you'd never expose publicly.
+# - The two are complementary, not alternatives. Run both.
+#
+# Requires: free Tailscale account (https://tailscale.com).
+# Setup: see docs/TAILSCALE.md.
+#
+# Uses a separate compose project name so operations on other files don't
+# accidentally stop the tunnel.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: tailscale
+
+services:
+  tailscale:
+    image: tailscale/tailscale:v1.98.3
+    container_name: tailscale
+    hostname: ${TS_HOSTNAME:-arr-stack-nas}
+    # network_mode: host is required for subnet routing — the daemon needs
+    # to see the host's LAN interface to advertise/route its subnet.
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - tailscale-state:/var/lib/tailscale
+    environment:
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      # Don't override the NAS's resolver (Pi-hole stays the LAN DNS).
+      # Split-DNS for *.lan is configured in the Tailscale admin console.
+      - TS_ACCEPT_DNS=false
+      # Auth: leave TS_AUTHKEY unset for interactive first-run auth.
+      # First start prints a login URL in `docker logs tailscale` — open it,
+      # authenticate, then approve the route in the admin console.
+      # (Optional) for unattended re-auth: set TS_AUTHKEY=tskey-auth-... in .env
+      - TS_AUTHKEY=${TS_AUTHKEY:-}
+      # Advertises your LAN subnet (LAN_SUBNET from .env) so tailnet peers can
+      # reach the whole network. Add extra subnets with TS_EXTRA_ROUTES if needed.
+      - TS_EXTRA_ARGS=--advertise-routes=${LAN_SUBNET}${TS_EXTRA_ROUTES:+,${TS_EXTRA_ROUTES}} --accept-routes
+    healthcheck:
+      test: ["CMD", "tailscale", "status", "--peers=false"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  tailscale-state:
