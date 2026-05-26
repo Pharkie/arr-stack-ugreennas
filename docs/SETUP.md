@@ -218,7 +218,7 @@ sudo git clone https://github.com/Pharkie/ultimate-arr-stack.git "$(basename "$N
 sudo chown -R 1000:1000 "$NAS_STACK_DIR"
 ```
 
-**Note:** Use `sudo` for Docker commands on Ugreen NAS. Service configs are stored in Docker named volumes (auto-created on first run).
+**Note:** Service configs are stored in Docker named volumes (auto-created on first run). Docker commands on Ugreen NAS need `sudo` by default — to skip that, add your user to the `docker` group once: `sudo usermod -aG docker $USER`, then log out of SSH and back in. After that, plain `docker` and `docker compose` work without `sudo`.
 
 <details>
 <summary><strong>Note on UGOS Antivirus</strong></summary>

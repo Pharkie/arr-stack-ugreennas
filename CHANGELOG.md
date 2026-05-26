@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.16] - 2026-05-26
+
+### Changed
+- **Cloudflared** 2026.5.0 → 2026.5.1. Tested against the live tunnel via one-off container swap (precheck PASS on all 5 DNS/UDP/TCP targets, Jellyfin returned 302 via HTTPS, no behaviour change observed)
+
+### Fixed
+- **`configure-apps.sh` timing out on first-boot installs**: `wait_for_service` had a hard 60s deadline, but Sonarr/Radarr first-run DB migrations routinely take 90-120s on NAS hardware. The script would fail every app in sequence on a fresh stack. Default raised to 180s with a `WAIT_TIMEOUT` env override for tuning. Reported on Reddit
+- **Cloudflared `config.yml` silently failing to write**: REMOTE-ACCESS.md instructed `sudo chown -R 65532:65532 cloudflared/` at step 1 (correctly — the container needs to write `cert.pem` during `tunnel login`), then `cat > cloudflared/config.yml` at step 3 — which now silently fails because the shell user no longer owns the directory. Step 3 file ops switched to `sudo tee` + `sudo chown`, with a one-line note explaining why. Reported on Reddit
+- **`mv cloudflared/*.json cloudflared/credentials.json` erroring on re-run**: if a user re-ran setup, the glob matched only the already-renamed `credentials.json` and `mv` refused to move a file to itself. Replaced with `find ... -not -name credentials.json` which is idempotent. Reported on Reddit
+
+### Added
+- **REMOTE-ACCESS.md Traefik prerequisite callout**: the Cloudflare tunnel forwards to `http://traefik:80`; without Traefik running the tunnel comes up clean and then errors with 1016 / `no such host`, which is hard to diagnose. Added an upfront prereq pointing to LOCAL-DNS.md (or a single deploy command). Reported on Reddit
+- **REMOTE-ACCESS.md note on apex DNS conflicts**: Cloudflare auto-creates an A record for the apex when a domain is added, so `tunnel route dns ... yourdomain.com` errors with "already exists" on the apex command (the wildcard succeeds). Added a one-liner pointing users to delete the existing record in the Cloudflare dashboard
+- **TROUBLESHOOTING.md "Gluetun: Harmless Log Noise on Startup"**: documents the two cosmetic gluetun warnings (`/tmp/gluetun/ip permission denied` and the ICMP healthcheck falling back to DNS) that users keep reading as fatal. Includes a `wget ifconfig.me` test to confirm the VPN is actually working. Reported on Reddit
+- **SETUP.md docker group tip**: kept the existing `sudo` recommendation but added the `usermod -aG docker $USER` one-liner so users who want to skip the `sudo` prefix know how
+
+### Documentation
+- **REFERENCE.md FlareSolverr row**: now notes the service is inactive until added as an Indexer Proxy in Prowlarr (with a link to the APP-CONFIG step). New users had FlareSolverr running but no Prowlarr proxy configured, then assumed it was broken when no traffic appeared in its logs
+
+---
+
 ## [1.7.15] - 2026-05-25
 
 ### Changed

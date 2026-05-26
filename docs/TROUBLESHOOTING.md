@@ -1,5 +1,24 @@
 # Troubleshooting
 
+## Gluetun: Harmless Log Noise on Startup
+
+**Symptom:** Two scary-looking lines in `docker logs gluetun` even though the VPN appears to be working:
+
+```
+ERROR [vpn] getting public IP address information: persisting public ip address: open /tmp/gluetun/ip: permission denied
+INFO  [healthcheck] listening for ICMP packets: not permitted: you can try adding NET_RAW capability to resolve this; permanently falling back to plain DNS over UDP checks
+```
+
+**Cause:** Both are non-fatal. The first is gluetun unable to cache the detected public IP to a file inside the container — the VPN connection itself is unaffected. The second is gluetun's healthcheck wanting to ping; we drop `NET_RAW` for security, so it falls back to DNS lookups (still a valid health signal).
+
+**Confirm the VPN is actually working:**
+```bash
+# Should print your VPN exit IP, NOT your home IP
+docker exec gluetun wget -qO- https://ifconfig.me
+```
+
+If that shows a different IP from your home connection, gluetun is fine — leave the warnings alone. If it shows your real IP (or times out), see the gluetun logs for `tunnel down`, `auth failed`, or the container restarting — those are the actual failure modes worth chasing.
+
 ## SABnzbd: Stuck Unpack Loop
 
 **Symptom:** Radarr shows "Downloading" at 100% with 0 B file size. SABnzbd UI is unresponsive or Save fails. Logs show `Unpacked files []` repeatedly.

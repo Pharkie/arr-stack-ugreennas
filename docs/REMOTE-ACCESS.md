@@ -7,6 +7,7 @@ Watch and request media from anywhere via `jellyfin.yourdomain.com` and `seerr.y
 **Requirements:**
 - Buy a new, external domain name (~$10/year) — [Cloudflare Registrar](https://www.cloudflare.com/products/registrar/) is simplest
 - Cloudflare account (free tier)
+- **Traefik must already be running.** Cloudflared forwards traffic to `http://traefik:80` — without it you'll see Cloudflare error 1016 / "no such host" in the tunnel logs. Complete [+ local DNS](LOCAL-DNS.md) first, or run `docker compose -f docker-compose.traefik.yml up -d` and verify it's healthy before continuing.
 
 ## Cloudflare Tunnel Setup
 
@@ -33,12 +34,15 @@ Note the tunnel ID (e.g., `6271ac25-f8ea-4cd3-b269-ad9778c61272`).
 
 **3. Rename credentials and create config:**
 
+> `cloudflared/` is now owned by UID 65532 (the container's user), so the file ops below use `sudo`.
+
 ```bash
-# Rename credentials file
-mv cloudflared/*.json cloudflared/credentials.json
+# Rename the tunnel credentials file (idempotent — safe to re-run)
+sudo find cloudflared -maxdepth 1 -name '*.json' -not -name 'credentials.json' \
+    -exec mv {} cloudflared/credentials.json \;
 
 # Create config (replace TUNNEL_ID and DOMAIN)
-cat > cloudflared/config.yml << 'EOF'
+sudo tee cloudflared/config.yml > /dev/null << 'EOF'
 tunnel: YOUR_TUNNEL_ID
 credentials-file: /home/nonroot/.cloudflared/credentials.json
 
@@ -49,6 +53,7 @@ ingress:
     service: http://traefik:80
   - service: http_status:404
 EOF
+sudo chown 65532:65532 cloudflared/config.yml
 ```
 
 **4. Add DNS routes:**
@@ -57,6 +62,8 @@ EOF
 docker run --rm -v ./cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared tunnel route dns nas-tunnel "*.yourdomain.com"
 docker run --rm -v ./cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared tunnel route dns nas-tunnel yourdomain.com
 ```
+
+> If either command errors with `An A, AAAA, or CNAME record with that host already exists`, Cloudflare auto-created a record for that hostname (commonly the apex) when you added the domain. Delete the existing record in Cloudflare dashboard → DNS → Records, then re-run the failing command.
 
 ## Update Traefik Config
 

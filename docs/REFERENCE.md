@@ -48,7 +48,7 @@
 | Pi-hole | 172.20.0.5 | 8081 | DNS ad-blocking (`/admin`) |
 | Seerr | 172.20.0.8 | 5055 | Request management |
 | Bazarr | 172.20.0.9 | 6767 | Subtitles |
-| ↳ FlareSolverr | (via Gluetun) | 8191 | Cloudflare bypass |
+| ↳ FlareSolverr | (via Gluetun) | 8191 | Cloudflare bypass (inactive until added as an Indexer Proxy in Prowlarr — see [APP-CONFIG.md](APP-CONFIG.md#46-prowlarr-indexer-manager)) |
 
 **+ local DNS** (traefik.yml):
 
